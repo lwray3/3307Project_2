@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>BlackjackWindow</class>
+ <widget class="QWidget" name="BlackjackWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>36</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Blackjack</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">
+    background-color: #124825;
+   </string>
+  </property>
+  <widget class="QPushButton" name="HitButton">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>480</y>
+     <width>131</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">    background-color: #399a5b;
+</string>
+   </property>
+   <property name="text">
+    <string>Hit</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="StandButton">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>480</y>
+     <width>131</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">    background-color: #399a5b;
+</string>
+   </property>
+   <property name="text">
+    <string>Stand</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="SplitButton">
+   <property name="geometry">
+    <rect>
+     <x>650</x>
+     <y>480</y>
+     <width>131</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">    background-color: #399a5b;
+</string>
+   </property>
+   <property name="text">
+    <string>Split</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="Blackjacktext">
+   <property name="geometry">
+    <rect>
+     <x>360</x>
+     <y>0</y>
+     <width>171</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>30</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Blackjack</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

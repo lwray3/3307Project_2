@@ -1,0 +1,11 @@
+{
+    "cmake.options.statusBarVisibility": "visible",
+    "cmake.buildDirectory": "${workspaceFolder}/builds/${buildKit}/${buildType}",
+    "cmake.generator": "Ninja",
+    "cmake.configureSettings": {
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.12.0/mingw_64",
+        "CMAKE_MAKE_PROGRAM": "C:/Qt/Tools/Ninja/ninja.exe"
+    },
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+    
+}

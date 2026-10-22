@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PokerWindow</class>
+ <widget class="QWidget" name="PokerWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Poker</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">
+    QWidget#PokerWindow {
+        background-color: #124825;
+    }
+    QLabel {
+        color: white;
+        font-size: 16px;
+        background: transparent;
+    }
+    QPushButton {
+        background-color: #399a5b;
+        color: white;
+        font-size: 15px;
+        border-radius: 6px;
+    }
+    QPushButton:hover {
+        background-color: #4dbb70;
+    }
+    QPushButton:disabled {
+        background-color: #63766a;
+        color: #cccccc;
+    }
+   </string>
+  </property>
+  <widget class="QLabel" name="TitleLabel">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>15</y>
+     <width>200</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>POKER</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignmentFlag::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="CommunityCardsLabel">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>205</y>
+     <width>300</width>
+     <height>35</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Community Cards</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignmentFlag::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="CommunityCardsDisplay">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>245</y>
+     <width>540</width>
+     <height>90</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">
+        border: 2px solid #399a5b;
+        border-radius: 8px;
+    </string>
+   </property>
+   <property name="text">
+    <string>Waiting for cards...</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignmentFlag::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="PlayerHandLabel">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>345</y>
+     <width>200</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Your Hand</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignmentFlag::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="PlayerHandDisplay">
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>380</y>
+     <width>240</width>
+     <height>70</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">
+        border: 2px solid #399a5b;
+        border-radius: 8px;
+    </string>
+   </property>
+   <property name="text">
+    <string>Your cards appear here</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignmentFlag::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="CheckButton">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>490</y>
+     <width>130</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Check</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="CallButton">
+   <property name="geometry">
+    <rect>
+     <x>225</x>
+     <y>490</y>
+     <width>130</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Call</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="RaiseButton">
+   <property name="geometry">
+    <rect>
+     <x>380</x>
+     <y>490</y>
+     <width>130</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Raise</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="FoldButton">
+   <property name="geometry">
+    <rect>
+     <x>535</x>
+     <y>490</y>
+     <width>130</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Fold</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="AllInButton">
+   <property name="geometry">
+    <rect>
+     <x>690</x>
+     <y>490</y>
+     <width>130</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>All In</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="PlayerChipsLabel">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>545</y>
+     <width>200</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Your Chips: $1000</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignmentFlag::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="RulesButton">
+   <property name="geometry">
+    <rect>
+     <x>750</x>
+     <y>20</y>
+     <width>130</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Rules</string>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="RaiseSpinBox">
+   <property name="geometry">
+    <rect>
+     <x>430</x>
+     <y>530</y>
+     <width>78</width>
+     <height>26</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
