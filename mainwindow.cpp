@@ -39,6 +39,12 @@ void MainWindow::openPoker()
     if (!pokerWindow) {
         pokerWindow = new PokerWindow(this);
         pokerWindow->setWindowFlags(Qt::Window);
+
+        connect(pokerWindow, &PokerWindow::backRequested,
+                this, [this]() {
+                    pokerWindow->hide();
+                    this->show();
+                });
     }
 
     pokerWindow->show();
@@ -58,6 +64,12 @@ void MainWindow::openBlackjack()
     if (!blackjackWindow) {
         blackjackWindow = new BlackjackWindow(this);
         blackjackWindow->setWindowFlags(Qt::Window);
+
+        connect(blackjackWindow, &BlackjackWindow::backRequested,
+                this, [this]() {
+                    blackjackWindow->hide();
+                    this->show();
+                });
     }
 
     // Show Blackjack

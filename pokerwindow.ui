@@ -234,6 +234,33 @@
     </rect>
    </property>
   </widget>
+  <widget class="QPushButton" name="Back">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>30</y>
+     <width>90</width>
+     <height>29</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Back</string>
+   </property>
+  </widget>
+  <zorder>Back</zorder>
+  <zorder>TitleLabel</zorder>
+  <zorder>CommunityCardsLabel</zorder>
+  <zorder>CommunityCardsDisplay</zorder>
+  <zorder>PlayerHandLabel</zorder>
+  <zorder>PlayerHandDisplay</zorder>
+  <zorder>CheckButton</zorder>
+  <zorder>CallButton</zorder>
+  <zorder>RaiseButton</zorder>
+  <zorder>FoldButton</zorder>
+  <zorder>AllInButton</zorder>
+  <zorder>PlayerChipsLabel</zorder>
+  <zorder>RulesButton</zorder>
+  <zorder>RaiseSpinBox</zorder>
  </widget>
  <resources/>
  <connections/>
