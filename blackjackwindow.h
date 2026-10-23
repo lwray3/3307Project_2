@@ -17,6 +17,9 @@ public:
     explicit BlackjackWindow(QWidget *parent = nullptr);
     ~BlackjackWindow();
 
+signals:
+    void backRequested();
+
 private slots:
     void onHit();
 

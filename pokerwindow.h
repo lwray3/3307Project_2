@@ -21,6 +21,8 @@ signals:
     void checkCallRequested();
     void raiseRequested(int totalStreetBet);
 
+    void backRequested();
+
 private slots:
     void onStartHand();
     void onFold();

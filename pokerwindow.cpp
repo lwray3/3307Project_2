@@ -15,6 +15,8 @@ PokerWindow::PokerWindow(QWidget *parent)
     connect(ui->RaiseButton, &QPushButton::clicked, this, &PokerWindow::onRaise);
     connect(ui->RulesButton, &QPushButton::clicked, this, &PokerWindow::onShowRules);
 
+    connect(ui->Back, &QPushButton::clicked, this, &PokerWindow::backRequested);
+
     // Poker::play() currently reads from std::cin and runs a whole match.
     // Do NOT call it from a Qt button: it would block the UI event loop.
     setBettingEnabled(false);

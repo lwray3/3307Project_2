@@ -6,6 +6,10 @@ BlackjackWindow::BlackjackWindow(QWidget *parent)
       ui(new Ui::BlackjackWindow)
 {
     ui->setupUi(this);
+
+    connect(ui->Back_Button, &QPushButton::clicked,
+        this, &BlackjackWindow::backRequested);
+
     connect(ui->HitButton, &QPushButton::clicked,
         this, &BlackjackWindow::onHit);
     

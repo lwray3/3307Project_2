@@ -92,6 +92,28 @@
     <string>Blackjack</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="Back_Button">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>30</y>
+     <width>141</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">    background-color: #399a5b;
+</string>
+   </property>
+   <property name="text">
+    <string>Back</string>
+   </property>
+  </widget>
+  <zorder>Back_Button</zorder>
+  <zorder>HitButton</zorder>
+  <zorder>StandButton</zorder>
+  <zorder>SplitButton</zorder>
+  <zorder>Blackjacktext</zorder>
  </widget>
  <resources/>
  <connections/>
