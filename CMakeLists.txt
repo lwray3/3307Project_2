@@ -36,6 +36,8 @@ qt_add_executable(CasinoGame_3307
     backend/GameManager.h
     backend/Poker.cpp
     backend/Poker.h
+    backend/CardWidget.h
+    backend/CardWidget.cpp
     
 )
 
