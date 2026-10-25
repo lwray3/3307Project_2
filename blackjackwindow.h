@@ -1,10 +1,11 @@
-
 #ifndef BLACKJACKWINDOW_H
 #define BLACKJACKWINDOW_H
 
 #include <QWidget>
 #include <QVector>
 #include <QPoint>
+
+#include <memory>
 
 #include "backend/Blackjack.h"
 #include "backend/CardWidget.h"
@@ -18,7 +19,11 @@ class BlackjackWindow : public QWidget
     Q_OBJECT
 
 public:
-    explicit BlackjackWindow(QWidget *parent = nullptr);
+    explicit BlackjackWindow(
+        std::unique_ptr<Blackjack> game,
+        QWidget* parent = nullptr
+        );
+
     ~BlackjackWindow();
 
 signals:
@@ -26,30 +31,37 @@ signals:
 
 private slots:
     void onHit();
+    void onStand();
 
 private:
-    Ui::BlackjackWindow *ui;
+    Ui::BlackjackWindow* ui;
 
-    // Existing Blackjack game logic
-    Blackjack game;
+    // Backend game created by GameFactory
+    std::unique_ptr<Blackjack> game;
 
-    // Cards currently displayed on screen
+    // Visual card widgets
     QVector<CardWidget*> playerCards;
     QVector<CardWidget*> dealerCards;
 
-    // Prevent multiple clicks during an animation
+    // Animation management
+    int activeAnimations = 0;
     bool animationRunning = false;
 
-    // Create and animate a new card
-    void animateCard(const Card& card,
-                     bool isDealer,
-                     bool faceUp = true);
-
-    // Display the player's current score
-    void updatePlayerScore();
-
-    // Display the initial two cards for each hand
+    // UI methods
     void displayInitialCards();
+
+    void animateCard(
+        const Card& card,
+        bool isDealer,
+        bool faceUp = true
+        );
+
+    void displayMissingDealerCards();
+    void revealDealerCards();
+
+    void updatePlayerScore();
+    void updateDealerScore();
+    void updateButtons();
 };
 
 #endif

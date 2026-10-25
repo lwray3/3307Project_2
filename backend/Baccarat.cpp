@@ -1,116 +1,163 @@
 #include "Baccarat.h"
 
-#include <iostream>
-
-Baccarat::Baccarat() {
+Baccarat::Baccarat()
+{
     deck.shuffle();
 }
 
-int Baccarat::cardValue(const Card& card) {
-    const int rank = static_cast<int>(card.getRank());
-    if (card.getRank() == Rank::ace) return 1;
-    if (rank >= 10) return 0;
-    return rank;
+void Baccarat::startRound()
+{
+    player.clearHand();
+    banker.clearHand();
+
+    deck.reset();
+    deck.shuffle();
+
+    player.addCard(deck.dealCard());
+    banker.addCard(deck.dealCard());
+
+    player.addCard(deck.dealCard());
+    banker.addCard(deck.dealCard());
+
+    roundOver = false;
 }
 
-int Baccarat::calculateScore(const std::vector<Card>& hand) const {
+int Baccarat::calcScore(
+    const std::vector<Card>& hand
+    ) const
+{
     int total = 0;
+
     for (const Card& card : hand) {
-        total += cardValue(card);
+        int value = static_cast<int>(card.getRank());
+
+        if (value == 14) {
+            value = 1;  // Ace
+        }
+        else if (value >= 10) {
+            value = 0;  // 10, J, Q, K
+        }
+
+        total += value;
     }
+
     return total % 10;
 }
 
-int Baccarat::calcScore(std::vector<Card> hand) {
-    return calculateScore(hand);
-}
+void Baccarat::playRound()
+{
+    if (roundOver) {
+        return;
+    }
 
-void Baccarat::dealInitialHands() {
-    playerHand.clear();
-    bankerHand.clear();
+    int playerScore = getPlayerScore();
+    int bankerScore = getBankerScore();
 
-    playerHand.push_back(deck.dealCard());
-    bankerHand.push_back(deck.dealCard());
-    playerHand.push_back(deck.dealCard());
-    bankerHand.push_back(deck.dealCard());
-}
+    // Natural 8 or 9: no additional cards.
+    if (playerScore >= 8 || bankerScore >= 8) {
+        roundOver = true;
+    }
+    else {
+        bool playerDrew = false;
+        int thirdCardValue = -1;
 
-void Baccarat::applyThirdCardRules() {
-    const int playerTotal = calculateScore(playerHand);
-    const int bankerTotal = calculateScore(bankerHand);
+        // Player draws on totals of 0-5.
+        if (playerScore <= 5) {
+            Card thirdCard = deck.dealCard();
+            player.addCard(thirdCard);
+            playerDrew = true;
 
-    // A natural 8 or 9 on either side ends drawing immediately.
-    if (playerTotal >= 8 || bankerTotal >= 8) return;
+            thirdCardValue = static_cast<int>(
+                thirdCard.getRank()
+                );
 
-    if (playerTotal <= 5) {
-        const Card thirdCard = deck.dealCard();
-        playerHand.push_back(thirdCard);
-        const int thirdValue = cardValue(thirdCard);
+            if (thirdCardValue == 14) {
+                thirdCardValue = 1;
+            }
+            else if (thirdCardValue >= 10) {
+                thirdCardValue = 0;
+            }
+        }
 
+        // Standard banker third-card rules.
         bool bankerDraws = false;
-        if (bankerTotal <= 2) bankerDraws = true;
-        else if (bankerTotal == 3) bankerDraws = thirdValue != 8;
-        else if (bankerTotal == 4) bankerDraws = thirdValue >= 2 && thirdValue <= 7;
-        else if (bankerTotal == 5) bankerDraws = thirdValue >= 4 && thirdValue <= 7;
-        else if (bankerTotal == 6) bankerDraws = thirdValue == 6 || thirdValue == 7;
 
-        if (bankerDraws) bankerHand.push_back(deck.dealCard());
-    } else {
-        // Player stands on 6 or 7; banker draws on 0 through 5.
-        if (bankerTotal <= 5) bankerHand.push_back(deck.dealCard());
+        if (!playerDrew) {
+            bankerDraws = bankerScore <= 5;
+        }
+        else {
+            if (bankerScore <= 2) {
+                bankerDraws = true;
+            }
+            else if (bankerScore == 3) {
+                bankerDraws = thirdCardValue != 8;
+            }
+            else if (bankerScore == 4) {
+                bankerDraws =
+                    thirdCardValue >= 2 &&
+                    thirdCardValue <= 7;
+            }
+            else if (bankerScore == 5) {
+                bankerDraws =
+                    thirdCardValue >= 4 &&
+                    thirdCardValue <= 7;
+            }
+            else if (bankerScore == 6) {
+                bankerDraws =
+                    thirdCardValue == 6 ||
+                    thirdCardValue == 7;
+            }
+        }
+
+        if (bankerDraws) {
+            banker.addCard(deck.dealCard());
+        }
+
+        roundOver = true;
+    }
+
+    if (getPlayerScore() > getBankerScore()) {
+        player.addWin();
+    }
+    else if (getPlayerScore() < getBankerScore()) {
+        player.addLoss();
     }
 }
 
-void Baccarat::startRound() {
-// Requires Deck::reset() to restore a full deck and its deal position.
+int Baccarat::getPlayerScore() const
+{
+    return calcScore(player.getHand());
+}
+
+int Baccarat::getBankerScore() const
+{
+    return calcScore(banker.getHand());
+}
+
+const Player& Baccarat::getPlayer() const
+{
+    return player;
+}
+
+const Player& Baccarat::getBanker() const
+{
+    return banker;
+}
+
+bool Baccarat::isRoundOver() const
+{
+    return roundOver;
+}
+
+void Baccarat::reset()
+{
+    player.clearHand();
+    banker.clearHand();
     deck.reset();
-    deck.shuffle();
-    dealInitialHands();
-    applyThirdCardRules();
-
-    const int playerTotal = calculateScore(playerHand);
-    const int bankerTotal = calculateScore(bankerHand);
-    if (playerTotal > bankerTotal) result = Result::Player;
-    else if (bankerTotal > playerTotal) result = Result::Banker;
-    else result = Result::Tie;
+    roundOver = true;
 }
 
-const std::vector<Card>& Baccarat::getPlayerHand() const {
-    return playerHand;
-}
-
-const std::vector<Card>& Baccarat::getBankerHand() const {
-    return bankerHand;
-}
-
-Baccarat::Result Baccarat::getResult() const {
-    return result;
-}
-
-void Baccarat::explain_rules() {
-    std::cout << "Baccarat (Punto Banco): Player and Banker are each dealt two cards.\n"
-              << "Aces count as 1; cards 2-9 count at face value; 10s and face cards count as 0.\n"
-              << "Only the last digit of the total counts (for example, 15 becomes 5).\n"
-              << "A natural 8 or 9 stops drawing. Otherwise, fixed third-card rules apply.\n"
-              << "The hand closer to 9 wins; equal totals are a tie.\n";
-}
-
-void Baccarat::play() {
-    startRound();
-
-    std::cout << "Player Hand: ";
-    for (const Card& card : playerHand) {
-        std::cout << static_cast<int>(card.getRank()) << ' ';
-    }
-    std::cout << "Score: " << calculateScore(playerHand) << '\n';
-
-    std::cout << "Banker Hand: ";
-    for (const Card& card : bankerHand) {
-        std::cout << static_cast<int>(card.getRank()) << ' ';
-    }
-    std::cout << "Score: " << calculateScore(bankerHand) << '\n';
-
-    if (result == Result::Player) std::cout << "Player wins!\n";
-    else if (result == Result::Banker) std::cout << "Banker wins!\n";
-    else std::cout << "It's a tie!\n";
+void Baccarat::explain_rules() const
+{
+    std::cout<<"Write Baccarat Rules here";
 }

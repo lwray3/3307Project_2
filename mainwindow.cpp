@@ -3,31 +3,32 @@
 #include "ui_mainwindow.h"
 #include "blackjackwindow.h"
 #include "pokerwindow.h"
+#include "backend/GameFactory.h"
 
 #include <QPushButton>
 #include <QDebug>
+#include <memory>
+#include <utility>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
-      ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    // Connect the button to the function
     connect(
         ui->playBlackjack,
         &QPushButton::clicked,
         this,
         &MainWindow::openBlackjack
-    );
+        );
 
     connect(
         ui->playPoker,
         &QPushButton::clicked,
         this,
         &MainWindow::openPoker
-    );
-    
+        );
+
 }
 
 void MainWindow::openPoker()
@@ -62,14 +63,38 @@ void MainWindow::openBlackjack()
 
     // Create the Blackjack window if necessary
     if (!blackjackWindow) {
-        blackjackWindow = new BlackjackWindow(this);
-        blackjackWindow->setWindowFlags(Qt::Window);
+        qDebug() << "Creating blackjack game";
+        auto game = GameFactory::createBlackjack();
+        qDebug() << "Creating blackjack window";
+        blackjackWindow = new BlackjackWindow(std::move(game), this);
+        blackjackWindow->setWindowFlag(Qt::Window,true);
+        connect(
+            blackjackWindow,
+            &BlackjackWindow::backRequested,
+            this,
+            [this]() {
 
-        connect(blackjackWindow, &BlackjackWindow::backRequested,
-                this, [this]() {
-                    blackjackWindow->hide();
-                    this->show();
-                });
+                qDebug() << "Returning to main menu";
+
+                // Hide Blackjack window
+                blackjackWindow->hide();
+
+                // Show main menu
+                this->show();
+                this->raise();
+                this->activateWindow();
+            }
+            );
+
+        // Reset pointer if Blackjack window is destroyed
+        connect(
+            blackjackWindow,
+            &QObject::destroyed,
+            this,
+            [this]() {
+                blackjackWindow = nullptr;
+            }
+            );
     }
 
     // Show Blackjack
