@@ -22,20 +22,45 @@ void Blackjack::startRound() {
     }
 }
 
+bool Blackjack::canHit() const
+{
+    return !roundOver && getPlayerScore() < 21;
+}
+
+bool Blackjack::canStand() const
+{
+    return !roundOver;
+}
+
 // Player requests another card
-void Blackjack::hit() {
-    if (roundOver) {
-        return;
+Card Blackjack::hit()
+{
+    // Prevent hitting after the round has ended
+    if (!canHit()) {
+        throw std::logic_error("Cannot hit: round is over or hitting is not allowed");
     }
 
+    // Deal a new card
     Card new_card = deck.dealCard();
+
+    // Add the card to the player's hand
     player.addCard(new_card);
 
-    int score = calcScore(player.getHand());
+    // Calculate the player's new score
+    int score = getPlayerScore();
 
+    // Check if the player busted
     if (score > 21) {
         roundOver = true;
+        player.addLoss();
     }
+    // Automatically stand if the player reaches 21
+    else if (score == 21) {
+        stand();
+    }
+
+    // Return the card so the UI can animate it
+    return new_card;
 }
 
 // Player stands, dealer draws until reaching 17
@@ -61,13 +86,22 @@ const Player& Blackjack::getDealer() const {
     return dealer;
 }
 
+int Blackjack::getPlayerScore() const {
+    return calcScore(player.getHand());
+}
+
+// Return the dealer
+int Blackjack::getDealerScore() const {
+    return calcScore(dealer.getHand());
+}
+
 // Check whether the round is finished
 bool Blackjack::isRoundOver() const {
     return roundOver;
 }
 
 // Explain Blackjack rules
-void Blackjack::explain_rules() {
+void Blackjack::explain_rules() const {
     std::cout << "In Blackjack, the goal is to have a hand value "
               << "as close to 21 as possible without going over."
               << std::endl;
@@ -82,7 +116,7 @@ void Blackjack::explain_rules() {
 }
 
 // Calculate the score of a hand
-int Blackjack::calcScore(std::vector<Card> hand) {
+int Blackjack::calcScore(const std::vector<Card>& hand) const {
     int score = 0;
     int aces = 0;
 
@@ -116,62 +150,3 @@ void Blackjack::reset() {
 }
 
 // Console version of Blackjack
-void Blackjack::play() {
-    reset();
-
-    std::cout << "Welcome to Blackjack!" << std::endl;
-    std::cout << "Would you like to hear the rules? (y/n): ";
-
-    char choice;
-
-    if (std::cin >> choice && (choice == 'y' || choice == 'Y')) {
-        explain_rules();
-    }
-
-    // Player's turn
-    while (!roundOver) {
-        std::cout << "Your score: "
-                  << calcScore(player.getHand()) << std::endl;
-
-        std::cout << "Would you like to hit or stand? (h/s): ";
-
-        if (!(std::cin >> choice)) {
-            return;
-        }
-
-        if (choice == 'h' || choice == 'H') {
-            hit();
-
-            if (roundOver) {
-                std::cout << "You busted!" << std::endl;
-                player.addLoss();
-                return;
-            }
-        }
-        else if (choice == 's' || choice == 'S') {
-            stand();
-        }
-        else {
-            std::cout << "Invalid input." << std::endl;
-        }
-    }
-
-    // Compare final scores
-    int playerScore = calcScore(player.getHand());
-    int dealerScore = calcScore(dealer.getHand());
-
-    std::cout << "Final Scores - Player: " << playerScore
-              << ", Dealer: " << dealerScore << std::endl;
-
-    if (dealerScore > 21 || playerScore > dealerScore) {
-        std::cout << "You win!" << std::endl;
-        player.addWin();
-    }
-    else if (playerScore < dealerScore) {
-        std::cout << "Dealer wins!" << std::endl;
-        player.addLoss();
-    }
-    else {
-        std::cout << "It's a tie!" << std::endl;
-    }
-}

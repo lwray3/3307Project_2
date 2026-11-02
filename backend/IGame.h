@@ -5,10 +5,12 @@
 
 class IGame {
 
-public: 
+public:
     virtual ~IGame() = default;
-    virtual int calcScore(std::vector<Card> hand) = 0;
-    virtual void explain_rules() = 0;
-    virtual void play() = 0;
+    virtual void startRound() = 0;
+    virtual int calcScore(const std::vector<Card>& hand) const = 0;
+    virtual void explain_rules() const = 0;
+    virtual void reset() = 0;
+    virtual bool isRoundOver() const = 0;
 
 }; 

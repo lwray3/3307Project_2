@@ -1,11 +1,7 @@
-
 #ifndef BLACKJACK_H
 #define BLACKJACK_H
 
-#include <vector>
-
 #include "IGame.h"
-#include "Card.h"
 #include "Deck.h"
 #include "Player.h"
 
@@ -14,28 +10,32 @@ private:
     Deck deck;
     Player player;
     Player dealer;
-    std::vector<Card> hand;
-    int score;
-    bool roundOver = false;
+
+    bool roundOver = true;
 
 public:
     Blackjack();
 
-    void startRound();
-    void hit();
+    // IGame functions
+    void startRound() override;
+
+    int calcScore(const std::vector<Card>& hand) const override;
+    void explain_rules() const override;
+    void reset() override;
+    bool isRoundOver() const override;
+
+    // Blackjack-specific functions
+    Card hit();
     void stand();
 
-    void explain_rules() override;
+    bool canHit() const;
+    bool canStand() const;
 
-    int calcScore(std::vector<Card> hand) override;
-
-    void reset();
-    void play();
+    int getPlayerScore() const;
+    int getDealerScore() const;
 
     const Player& getPlayer() const;
     const Player& getDealer() const;
-
-    bool isRoundOver() const;
 };
 
 #endif
