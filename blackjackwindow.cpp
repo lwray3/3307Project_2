@@ -1,14 +1,14 @@
 #include "blackjackwindow.h"
 #include "ui_blackjackwindow.h"
 
-#include <QPushButton>
-#include <QLabel>
-#include <QPropertyAnimation>
-#include <QEasingCurve>
 #include <QAbstractAnimation>
 #include <QDebug>
+#include <QEasingCurve>
+#include <QLabel>
+#include <QPropertyAnimation>
+#include <QPushButton>
 #include <QString>
-
+#include "GameWindow.h"
 #include <stdexcept>
 #include <utility>
 
@@ -18,12 +18,10 @@
 
 BlackjackWindow::BlackjackWindow(
 
-    std::unique_ptr<Blackjack> game,
-    QWidget* parent
-    )
-    : QWidget(parent),
-    ui(new Ui::BlackjackWindow),
-    game(std::move(game))
+    std::unique_ptr<Blackjack> game, QWidget *parent)
+    : GameWindow(parent)
+    , ui(new Ui::BlackjackWindow)
+    , game(std::move(game))
 {
     if (!this->game) {
         throw std::invalid_argument("Blackjack game is null");
@@ -32,28 +30,13 @@ BlackjackWindow::BlackjackWindow(
     ui->setupUi(this);
 
     // Back button
-    connect(
-        ui->Back_Button,
-        &QPushButton::clicked,
-        this,
-        &BlackjackWindow::backRequested
-        );
+    connect(ui->Back_Button, &QPushButton::clicked, this, &BlackjackWindow::backRequested);
 
     // Hit button
-    connect(
-        ui->HitButton,
-        &QPushButton::clicked,
-        this,
-        &BlackjackWindow::onHit
-        );
+    connect(ui->HitButton, &QPushButton::clicked, this, &BlackjackWindow::onHit);
 
     // Stand button
-    connect(
-        ui->StandButton,
-        &QPushButton::clicked,
-        this,
-        &BlackjackWindow::onStand
-        );
+    connect(ui->StandButton, &QPushButton::clicked, this, &BlackjackWindow::onStand);
 
     // Start the round in the backend
     this->game->startRound();
@@ -65,57 +48,40 @@ BlackjackWindow::BlackjackWindow(
     updateButtons();
 }
 
-
 // --------------------------------------------------
 // Display initial cards
 // --------------------------------------------------
 
 void BlackjackWindow::displayInitialCards()
 {
-    const auto& playerHand =
-        game->getPlayer().getHand();
+    const auto &playerHand = game->getPlayer().getHand();
 
-    const auto& dealerHand =
-        game->getDealer().getHand();
+    const auto &dealerHand = game->getDealer().getHand();
 
     // Display player's initial cards
-    for (const Card& card : playerHand) {
+    for (const Card &card : playerHand) {
         animateCard(card, false, true);
     }
 
     // Display dealer's initial cards
-    for (int i = 0;
-         i < static_cast<int>(dealerHand.size());
-         i++) {
-
+    for (int i = 0; i < static_cast<int>(dealerHand.size()); i++) {
         bool faceUp = (i == 0);
 
-        animateCard(
-            dealerHand[i],
-            true,
-            faceUp
-            );
+        animateCard(dealerHand[i], true, faceUp);
     }
 }
-
 
 // --------------------------------------------------
 // Animate a card
 // --------------------------------------------------
 
-void BlackjackWindow::animateCard(
-    const Card& card,
-    bool isDealer,
-    bool faceUp
-    )
+void BlackjackWindow::animateCard(const Card &card, bool isDealer, bool faceUp)
 {
-    CardWidget* cardWidget =
-        new CardWidget(card, this);
+    CardWidget *cardWidget = new CardWidget(card, this);
 
     cardWidget->setFaceUp(faceUp);
 
-    QVector<CardWidget*>& cards =
-        isDealer ? dealerCards : playerCards;
+    QVector<CardWidget *> &cards = isDealer ? dealerCards : playerCards;
 
     cards.append(cardWidget);
 
@@ -124,49 +90,31 @@ void BlackjackWindow::animateCard(
     const int cardWidth = 72;
     const int spacing = 82;
 
-    QPoint startPosition(
-        width() - 110,
-        80
-        );
+    QPoint startPosition(width() - 110, 80);
 
-    int totalWidth =
-        static_cast<int>(cards.size()) * cardWidth
-        + (static_cast<int>(cards.size()) - 1)
-              * (spacing - cardWidth);
+    int totalWidth = static_cast<int>(cards.size()) * cardWidth
+                     + (static_cast<int>(cards.size()) - 1) * (spacing - cardWidth);
 
-    int startX =
-        (width() - totalWidth) / 2;
+    int startX = (width() - totalWidth) / 2;
 
-    int targetX =
-        startX + cardIndex * spacing;
+    int targetX = startX + cardIndex * spacing;
 
-    int targetY =
-        isDealer ? 145 : 370;
+    int targetY = isDealer ? 145 : 370;
 
-    QPoint targetPosition(
-        targetX,
-        targetY
-        );
+    QPoint targetPosition(targetX, targetY);
 
     cardWidget->move(startPosition);
     cardWidget->show();
     cardWidget->raise();
 
-    QPropertyAnimation* animation =
-        new QPropertyAnimation(
-            cardWidget,
-            "pos",
-            cardWidget
-            );
+    QPropertyAnimation *animation = new QPropertyAnimation(cardWidget, "pos", cardWidget);
 
     animation->setDuration(450);
 
     animation->setStartValue(startPosition);
     animation->setEndValue(targetPosition);
 
-    animation->setEasingCurve(
-        QEasingCurve::OutCubic
-        );
+    animation->setEasingCurve(QEasingCurve::OutCubic);
 
     // Count running animations
     activeAnimations++;
@@ -174,27 +122,17 @@ void BlackjackWindow::animateCard(
 
     updateButtons();
 
-    connect(
-        animation,
-        &QPropertyAnimation::finished,
-        this,
-        [this]() {
+    connect(animation, &QPropertyAnimation::finished, this, [this]() {
+        activeAnimations--;
 
-            activeAnimations--;
+        animationRunning = (activeAnimations > 0);
 
-            animationRunning =
-                (activeAnimations > 0);
+        updatePlayerScore();
+        updateButtons();
+    });
 
-            updatePlayerScore();
-            updateButtons();
-        }
-        );
-
-    animation->start(
-        QAbstractAnimation::DeleteWhenStopped
-        );
+    animation->start(QAbstractAnimation::DeleteWhenStopped);
 }
-
 
 // --------------------------------------------------
 // Update player's score
@@ -204,14 +142,10 @@ void BlackjackWindow::updatePlayerScore()
 {
     int score = game->getPlayerScore();
 
-    ui->playerScoreLabel->setText(
-        "Your Score: "
-        + QString::number(score)
-        );
+    ui->playerScoreLabel->setText("Your Score: " + QString::number(score));
 
     qDebug() << "Player score:" << score;
 }
-
 
 // --------------------------------------------------
 // Update dealer's score
@@ -231,25 +165,18 @@ void BlackjackWindow::updateDealerScore()
     // update it here.
 }
 
-
 // --------------------------------------------------
 // Update buttons
 // --------------------------------------------------
 
 void BlackjackWindow::updateButtons()
 {
-    bool canInteract =
-        !animationRunning;
+    bool canInteract = !animationRunning;
 
-    ui->HitButton->setEnabled(
-        canInteract && game->canHit()
-        );
+    ui->HitButton->setEnabled(canInteract && game->canHit());
 
-    ui->StandButton->setEnabled(
-        canInteract && game->canStand()
-        );
+    ui->StandButton->setEnabled(canInteract && game->canStand());
 }
-
 
 // --------------------------------------------------
 // Hit button
@@ -262,23 +189,17 @@ void BlackjackWindow::onHit()
     }
 
     try {
-
         // Backend handles dealing and scoring
         Card newCard = game->hit();
 
         qDebug() << "Player received another card";
 
         // UI animates the new card
-        animateCard(
-            newCard,
-            false,
-            true
-            );
+        animateCard(newCard, false, true);
 
         updatePlayerScore();
 
         if (game->isRoundOver()) {
-
             qDebug() << "Round ended";
 
             // Reveal dealer's cards
@@ -291,12 +212,10 @@ void BlackjackWindow::onHit()
         }
 
         updateButtons();
-    }
-    catch (const std::exception& e) {
+    } catch (const std::exception &e) {
         qWarning() << "Hit error:" << e.what();
     }
 }
-
 
 // --------------------------------------------------
 // Stand button
@@ -309,7 +228,6 @@ void BlackjackWindow::onStand()
     }
 
     try {
-
         // Backend handles dealer turn
         game->stand();
 
@@ -322,12 +240,10 @@ void BlackjackWindow::onStand()
         updatePlayerScore();
         updateDealerScore();
         updateButtons();
-    }
-    catch (const std::exception& e) {
+    } catch (const std::exception &e) {
         qWarning() << "Stand error:" << e.what();
     }
 }
-
 
 // --------------------------------------------------
 // Animate missing dealer cards
@@ -335,23 +251,14 @@ void BlackjackWindow::onStand()
 
 void BlackjackWindow::displayMissingDealerCards()
 {
-    const auto& dealerHand =
-        game->getDealer().getHand();
+    const auto &dealerHand = game->getDealer().getHand();
 
     int displayed = dealerCards.size();
 
-    for (int i = displayed;
-         i < static_cast<int>(dealerHand.size());
-         i++) {
-
-        animateCard(
-            dealerHand[i],
-            true,
-            true
-            );
+    for (int i = displayed; i < static_cast<int>(dealerHand.size()); i++) {
+        animateCard(dealerHand[i], true, true);
     }
 }
-
 
 // --------------------------------------------------
 // Reveal dealer's cards
@@ -363,11 +270,10 @@ void BlackjackWindow::revealDealerCards()
         return;
     }
 
-    for (CardWidget* card : dealerCards) {
+    for (CardWidget *card : dealerCards) {
         card->setFaceUp(true);
     }
 }
-
 
 // --------------------------------------------------
 // Destructor
