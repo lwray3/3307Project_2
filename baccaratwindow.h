@@ -1,0 +1,4 @@
+#ifndef BACCARATWINDOW_H
+#define BACCARATWINDOW_H
+
+#endif // BACCARATWINDOW_H
