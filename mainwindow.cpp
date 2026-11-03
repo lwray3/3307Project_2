@@ -4,6 +4,7 @@
 #include "blackjackwindow.h"
 #include "pokerwindow.h"
 #include "backend/GameFactory.h"
+#include "baccaratwindow.h"
 
 #include <QPushButton>
 #include <QDebug>
@@ -27,6 +28,13 @@ MainWindow::MainWindow(QWidget *parent)
         &QPushButton::clicked,
         this,
         &MainWindow::openPoker
+        );
+
+    connect(
+        ui->playBaccarat,
+        &QPushButton::clicked,
+        this,
+        &MainWindow::openBaccarat
         );
 
 }
@@ -101,6 +109,20 @@ void MainWindow::openBlackjack()
     blackjackWindow->show();
     blackjackWindow->raise();
     blackjackWindow->activateWindow();
+
+    // Hide the main menu
+    this->hide();
+}
+
+void MainWindow::openBaccarat(){
+    if (!baccaratWindow) {
+        baccaratWindow = new BaccaratWindow(this);
+        baccaratWindow->setWindowFlags(Qt::Window);
+    }
+
+    baccaratWindow->show();
+    baccaratWindow->raise();
+    baccaratWindow->activateWindow();
 
     // Hide the main menu
     this->hide();
