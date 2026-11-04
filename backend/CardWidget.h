@@ -1,4 +1,3 @@
-
 #ifndef CARDWIDGET_H
 #define CARDWIDGET_H
 

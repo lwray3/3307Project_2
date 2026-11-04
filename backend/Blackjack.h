@@ -10,15 +10,18 @@ private:
     Deck deck;
     Player player;
     Player dealer;
-
-    bool roundOver = true;
+    bool dealerTurn = false;
+    bool roundOver = false;
 
 public:
     Blackjack();
 
     // IGame functions
     void startRound() override;
-
+    bool dealerShouldHit() const;
+    Card dealerHit();
+    void finishRound();
+    bool isDealerTurn() const;
     int calcScore(const std::vector<Card>& hand) const override;
     void explain_rules() const override;
     void reset() override;
