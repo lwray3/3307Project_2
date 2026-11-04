@@ -55,7 +55,7 @@ void MainWindow::openBlackjack()
         qDebug() << "Creating blackjack window";
         blackjackWindow = new BlackjackWindow(std::move(game), this);
         blackjackWindow->setWindowFlag(Qt::Window, true);
-        connect(blackjackWindow, &BlackjackWindow::backRequested, this, [this]() {
+        connect(blackjackWindow, &GameWindow::backRequested, this, [this]() {
             qDebug() << "Returning to main menu";
 
             // Hide Blackjack window

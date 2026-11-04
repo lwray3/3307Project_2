@@ -1,6 +1,6 @@
 #ifndef BLACKJACKWINDOW_H
 #define BLACKJACKWINDOW_H
-
+#include <functional>
 #include <QPoint>
 #include <QVector>
 #include <QWidget>
@@ -9,6 +9,7 @@
 
 #include "backend/Blackjack.h"
 #include "backend/CardWidget.h"
+#include "GameWindow.h"
 
 namespace Ui {
 class BlackjackWindow;
@@ -23,12 +24,11 @@ public:
 
     ~BlackjackWindow();
 
-signals:
-    void backRequested();
-
 private slots:
     void onHit();
     void onStand();
+    void onPlayAgain();
+    void onMainMenu();
 
 private:
     Ui::BlackjackWindow *ui;
@@ -46,15 +46,21 @@ private:
 
     // UI methods
     void displayInitialCards();
-
-    void animateCard(const Card &card, bool isDealer, bool faceUp = true);
-
-    void displayMissingDealerCards();
-    void revealDealerCards();
-
+    void beginDealerTurn();
+    void processDealerTurn();
     void updatePlayerScore();
     void updateDealerScore();
     void updateButtons();
+
+    void animateCard(const Card &card, bool isDealer, bool faceUp = true, std::function<void()> onFinished = {});
+    void afterPlayerHitAnimation();
+    void displayMissingDealerCards();
+    void revealDealerCards();
+    void displayRoundResult();
+    void finishRoundDisplay();
+    void clearDisplayedCards();
+    void afterPlayerAnimation();
 };
+
 
 #endif

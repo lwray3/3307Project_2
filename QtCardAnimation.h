@@ -1,4 +1,3 @@
-
 #ifndef QTCARDANIMATION_H
 #define QTCARDANIMATION_H
 
