@@ -11,5 +11,12 @@ BaccaratWindow::BaccaratWindow(QWidget *parent)
 
 BaccaratWindow::~BaccaratWindow()
 {
+    connect(
+        ui->Back_Button,
+        &QPushButton::clicked,
+        this,
+        &BlackjackWindow::backRequested
+        );
+
     delete ui;
 }

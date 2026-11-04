@@ -16,6 +16,9 @@ public:
     explicit BaccaratWindow(QWidget *parent = nullptr);
     ~BaccaratWindow();
 
+signals:
+    void backRequested();
+
 private:
     Ui::Dialog *ui;
 };
