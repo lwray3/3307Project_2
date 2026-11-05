@@ -15,6 +15,7 @@ void Blackjack::startRound() {
     deck.shuffle();
 
     roundOver = false;
+    dealerTurn = false;
 
     for (int i = 0; i < 2; i++) {
         player.addCard(deck.dealCard());
@@ -22,15 +23,6 @@ void Blackjack::startRound() {
     }
 }
 
-bool Blackjack::canHit() const
-{
-    return !roundOver && getPlayerScore() < 21;
-}
-
-bool Blackjack::canStand() const
-{
-    return !roundOver;
-}
 
 // Player requests another card
 Card Blackjack::hit()
@@ -40,7 +32,7 @@ Card Blackjack::hit()
         throw std::logic_error("Cannot hit: round is over or hitting is not allowed");
     }
 
-    // Deal a new card
+    // Deals a new card
     Card new_card = deck.dealCard();
 
     // Add the card to the player's hand
@@ -52,6 +44,7 @@ Card Blackjack::hit()
     // Check if the player busted
     if (score > 21) {
         roundOver = true;
+        dealerTurn = false;
         player.addLoss();
     }
     // Automatically stand if the player reaches 21
@@ -64,18 +57,14 @@ Card Blackjack::hit()
 }
 
 // Player stands, dealer draws until reaching 17
-void Blackjack::stand() {
-    if (roundOver) {
-        return;
+void Blackjack::stand()
+{
+    if (!canStand()) {
+        throw std::logic_error("Cannot stand");
     }
 
-    while (calcScore(dealer.getHand()) < 17) {
-        dealer.addCard(deck.dealCard());
-    }
-
-    roundOver = true;
+    dealerTurn = true;
 }
-
 // Return the player
 const Player& Blackjack::getPlayer() const {
     return player;
@@ -90,11 +79,76 @@ int Blackjack::getPlayerScore() const {
     return calcScore(player.getHand());
 }
 
+Card Blackjack::dealerHit()
+{
+    if (!dealerShouldHit()) {
+        throw std::logic_error("Dealer cannot hit");
+    }
+
+    Card newCard = deck.dealCard();
+
+    dealer.addCard(newCard);
+
+    return newCard;
+}
+
+bool Blackjack::dealerShouldHit() const
+{
+    return !roundOver
+           && dealerTurn
+           && getDealerScore() < 17;
+}
 // Return the dealer
 int Blackjack::getDealerScore() const {
     return calcScore(dealer.getHand());
 }
 
+bool Blackjack::canHit() const
+{
+    return !roundOver
+           && !dealerTurn
+           && getPlayerScore() < 21;
+}
+
+bool Blackjack::canStand() const
+{
+    return !roundOver && !dealerTurn;
+}
+
+bool Blackjack::isDealerTurn() const
+{
+    return dealerTurn;
+}
+void Blackjack::finishRound()
+{
+    if (roundOver || !dealerTurn) {
+        return;
+    }
+
+    if (dealerShouldHit()) {
+        throw std::logic_error(
+            "Dealer must finish drawing first"
+            );
+    }
+
+    int playerScore = getPlayerScore();
+    int dealerScore = getDealerScore();
+
+    if (dealerScore > 21) {
+        player.addWin();
+    }
+    else if (playerScore > dealerScore) {
+        player.addWin();
+    }
+    else if (dealerScore > playerScore) {
+        player.addLoss();
+    }
+
+    // Equal scores represent a tie.
+
+    roundOver = true;
+    dealerTurn = false;
+}
 // Check whether the round is finished
 bool Blackjack::isRoundOver() const {
     return roundOver;

@@ -1,41 +1,33 @@
-
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "backend/GameFactory.h"
 #include "blackjackwindow.h"
 #include "pokerwindow.h"
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
 #include "backend/GameFactory.h"
+#include "blackjackwindow.h"
+#include "pokerwindow.h"
 #include "baccaratwindow.h"
 
-#include <QPushButton>
 #include <QDebug>
+#include <QPushButton>
 #include <memory>
 #include <utility>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    connect(
-        ui->playBlackjack,
-        &QPushButton::clicked,
-        this,
-        &MainWindow::openBlackjack
-        );
-
-    connect(
-        ui->playPoker,
-        &QPushButton::clicked,
-        this,
-        &MainWindow::openPoker
-        );
-
+    connect(ui->playBlackjack, &QPushButton::clicked, this, &MainWindow::openBlackjack);
     connect(
         ui->playBaccarat,
         &QPushButton::clicked,
         this,
         &MainWindow::openBaccarat
         );
+
+    connect(ui->playPoker, &QPushButton::clicked, this, &MainWindow::openPoker);
 
 }
 
@@ -49,11 +41,10 @@ void MainWindow::openPoker()
         pokerWindow = new PokerWindow(this);
         pokerWindow->setWindowFlags(Qt::Window);
 
-        connect(pokerWindow, &PokerWindow::backRequested,
-                this, [this]() {
-                    pokerWindow->hide();
-                    this->show();
-                });
+        connect(pokerWindow, &PokerWindow::backRequested, this, [this]() {
+            pokerWindow->hide();
+            this->show();
+        });
     }
 
     pokerWindow->show();
@@ -75,34 +66,21 @@ void MainWindow::openBlackjack()
         auto game = GameFactory::createBlackjack();
         qDebug() << "Creating blackjack window";
         blackjackWindow = new BlackjackWindow(std::move(game), this);
-        blackjackWindow->setWindowFlag(Qt::Window,true);
-        connect(
-            blackjackWindow,
-            &BlackjackWindow::backRequested,
-            this,
-            [this]() {
+        blackjackWindow->setWindowFlag(Qt::Window, true);
+        connect(blackjackWindow, &GameWindow::backRequested, this, [this]() {
+            qDebug() << "Returning to main menu";
 
-                qDebug() << "Returning to main menu";
+            // Hide Blackjack window
+            blackjackWindow->hide();
 
-                // Hide Blackjack window
-                blackjackWindow->hide();
-
-                // Show main menu
-                this->show();
-                this->raise();
-                this->activateWindow();
-            }
-            );
+            // Show main menu
+            this->show();
+            this->raise();
+            this->activateWindow();
+        });
 
         // Reset pointer if Blackjack window is destroyed
-        connect(
-            blackjackWindow,
-            &QObject::destroyed,
-            this,
-            [this]() {
-                blackjackWindow = nullptr;
-            }
-            );
+        connect(blackjackWindow, &QObject::destroyed, this, [this]() { blackjackWindow = nullptr; });
     }
 
     // Show Blackjack
@@ -118,6 +96,15 @@ void MainWindow::openBaccarat(){
     if (!baccaratWindow) {
         baccaratWindow = new BaccaratWindow(this);
         baccaratWindow->setWindowFlags(Qt::Window);
+
+        connect(baccaratWindow, &BaccaratWindow::backRequested,
+                this, [this]() {
+                    baccaratWindow->hide();
+
+                    this->show();
+                    this->raise();
+                    this->activateWindow();
+                });
     }
 
     baccaratWindow->show();

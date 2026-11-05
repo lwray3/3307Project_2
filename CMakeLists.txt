@@ -46,6 +46,11 @@ qt_add_executable(CasinoGame_3307
     baccaratwindow.h
     baccaratwindow.cpp
 
+    IGameAnimation.h
+    QtCardAnimation.h
+    QtCardAnimation.cpp
+    GameWindow.h
+    GameWindow.cpp
     
 )
 
