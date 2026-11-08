@@ -1,42 +1,90 @@
+
 #ifndef POKERWINDOW_H
 #define POKERWINDOW_H
 
-#include <QWidget>
+#include "GameWindow.h"
 #include "backend/Poker.h"
+#include "backend/CardWidget.h"
+#include "backend/GameManager.h"
 
-QT_BEGIN_NAMESPACE
+#include <QVector>
+#include <QPoint>
+
+#include <functional>
+#include <stdexcept>
+
 namespace Ui {
 class PokerWindow;
 }
-QT_END_NAMESPACE
 
-class PokerWindow : public QWidget
+class PokerWindow : public GameWindow
 {
     Q_OBJECT
+
 public:
-    explicit PokerWindow(QWidget *parent = nullptr);
+    explicit PokerWindow(
+        GameManager& manager,
+        QWidget* parent = nullptr
+        );
+
     ~PokerWindow() override;
 
-signals:
-    // Connect these to a future non-blocking, turn-based Poker backend API.
-    void startHandRequested();
-    void foldRequested();
-    void checkCallRequested();
-    void raiseRequested(int totalStreetBet);
-
-    void backRequested();
-
 private slots:
-    void onStartHand();
+    void onCheck();
+    void onBet();
     void onFold();
-    void onCheckCall();
+    void onPlayAgain();
+    void onMainMenu();
+    void onCall();
     void onRaise();
-    void onShowRules();
 
 private:
-    Ui::PokerWindow *ui;
-    Poker game;
-    void setBettingEnabled(bool enabled);
+    Ui::PokerWindow* ui;
+
+    // GameManager owns the Poker object
+    GameManager& manager;
+
+    // Access the active Poker game
+    Poker& game() const {
+        Poker* poker =
+            dynamic_cast<Poker*>(manager.getGame());
+
+        if (!poker) {
+            throw std::logic_error(
+                "No active Poker game"
+                );
+        }
+
+        return *poker;
+    }
+
+    // Card widgets
+    QVector<CardWidget*> playerCards;
+    QVector<CardWidget*> dealerCards;
+    QVector<CardWidget*> communityCardWidgets;
+
+    // Animation management
+    int activeAnimations = 0;
+    bool animationRunning = false;
+
+    // Card animation
+    void animateCard(
+        const Card& card,
+        QVector<CardWidget*>& collection,
+        const QPoint& target,
+        bool faceUp = true,
+        std::function<void()> onFinished = {}
+        );
+
+    // UI methods
+    void displayInitialCards();
+    void displayNewCommunityCards();
+    void afterBettingAction();
+    void updatePlayerStats();
+    void updateLabels();
+    void updateButtons();
+    void finishRoundDisplay();
+    void clearDisplayedCards();
 };
 
 #endif

@@ -19,64 +19,135 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->playPoker, &QPushButton::clicked, this, &MainWindow::openPoker);
 }
 
-void MainWindow::openPoker()
-{
-    // Print a message to confirm the button works
-    qDebug() << "Play Poker button clicked!";
 
-    // Create the Blackjack window if necessary
-    if (!pokerWindow) {
-        pokerWindow = new PokerWindow(this);
-        pokerWindow->setWindowFlags(Qt::Window);
-
-        connect(pokerWindow, &PokerWindow::backRequested, this, [this]() {
-            pokerWindow->hide();
-            this->show();
-        });
-    }
-
-    pokerWindow->show();
-    pokerWindow->raise();
-    pokerWindow->activateWindow();
-
-    // Hide the main menu
-    this->hide();
-}
 
 void MainWindow::openBlackjack()
 {
-    // Print a message to confirm the button works
     qDebug() << "Play Blackjack button clicked!";
 
-    // Create the Blackjack window if necessary
+    // Only create the game and window if they don't exist
     if (!blackjackWindow) {
+
         qDebug() << "Creating blackjack game";
-        auto game = GameFactory::createBlackjack();
+
+        // Step 1: Factory creates the Blackjack object
+        auto blackjack = GameFactory::createBlackjack();
+
+        // Step 2: Transfer ownership to GameManager
+        manager.setGame(std::move(blackjack));
+
+        // Step 3: GameManager starts the Blackjack round
+        manager.startRound();
+
         qDebug() << "Creating blackjack window";
-        blackjackWindow = new BlackjackWindow(std::move(game), this);
+
+        // Step 4: Pass GameManager to BlackjackWindow
+        blackjackWindow = new BlackjackWindow(
+            manager,
+            this
+            );
+        // Make BlackjackWindow a separate window
         blackjackWindow->setWindowFlag(Qt::Window, true);
-        connect(blackjackWindow, &GameWindow::backRequested, this, [this]() {
-            qDebug() << "Returning to main menu";
+        // Step 5: Handle returning to the main menu
+        connect(
+            blackjackWindow,
+            &GameWindow::backRequested,
+            this,
+            [this]() {
+                qDebug() << "Returning to main menu";
 
-            // Hide Blackjack window
-            blackjackWindow->hide();
+                blackjackWindow->hide();
 
-            // Show main menu
-            this->show();
-            this->raise();
-            this->activateWindow();
-        });
+                this->show();
+                this->raise();
+                this->activateWindow();
+            }
+            );
 
-        // Reset pointer if Blackjack window is destroyed
-        connect(blackjackWindow, &QObject::destroyed, this, [this]() { blackjackWindow = nullptr; });
+        // Step 6: Reset pointer if window is destroyed
+        connect(
+            blackjackWindow,
+            &QObject::destroyed,
+            this,
+            [this]() {
+                blackjackWindow = nullptr;
+            }
+            );
     }
 
-    // Show Blackjack
+    // Step 7: Show Blackjack window
     blackjackWindow->show();
     blackjackWindow->raise();
     blackjackWindow->activateWindow();
 
-    // Hide the main menu
+    // Step 8: Hide main menu
+    this->hide();
+}
+
+
+
+void MainWindow::openPoker()
+{
+    qDebug() << "Play Poker button clicked!";
+
+    // Only create the game and window if they don't exist
+    if (!pokerWindow) {
+
+        qDebug() << "Creating Poker game";
+
+        // Step 1: GameFactory creates the Poker object
+        auto poker = GameFactory::createPoker();
+
+        // Step 2: GameManager takes ownership
+        manager.setGame(std::move(poker));
+
+        // Step 3: Start the Poker round
+        // Only if the Poker constructor hasn't started it
+        manager.startRound();
+
+        // Step 4: Create PokerWindow using GameManager
+        pokerWindow = new PokerWindow(manager, this);
+
+        // Make PokerWindow a separate window
+        pokerWindow->setWindowFlag(Qt::Window, true);
+
+        // Step 5: Handle returning to main menu
+        connect(
+            pokerWindow,
+            &GameWindow::backRequested,
+            this,
+            [this]() {
+                qDebug() << "Returning to main menu";
+
+                pokerWindow->close();
+                pokerWindow->deleteLater();
+                pokerWindow = nullptr;
+
+                manager.clearGame();
+
+                this->show();
+                this->raise();
+                this->activateWindow();
+            }
+            );
+
+        // Step 6: Reset pointer if window is destroyed
+        connect(
+            pokerWindow,
+            &QObject::destroyed,
+            this,
+            [this]() {
+                pokerWindow = nullptr;
+            }
+            );
+    }
+
+    // Step 7: Display PokerWindow
+    pokerWindow->show();
+    pokerWindow->raise();
+    pokerWindow->activateWindow();
+
+    // Step 8: Hide MainWindow
     this->hide();
 }
 

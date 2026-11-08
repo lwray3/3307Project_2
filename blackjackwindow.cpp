@@ -16,25 +16,29 @@
 // Constructor
 // --------------------------------------------------
 
-BlackjackWindow::BlackjackWindow(
 
-    std::unique_ptr<Blackjack> game, QWidget *parent)
+BlackjackWindow::BlackjackWindow(
+    GameManager& manager,
+    QWidget* parent
+    )
     : GameWindow(parent)
     , ui(new Ui::BlackjackWindow)
-    , game(std::move(game))
+    , manager(manager)
 {
-    if (!this->game) {
-        throw std::invalid_argument("Blackjack game is null");
-    }
-
     ui->setupUi(this);
+
     setActionLabel(ui->actionLabel);
 
-    // Back button
-    connect(ui->Back_Button, &QPushButton::clicked, this, &BlackjackWindow::backRequested);
+    connect(ui->HitButton,
+            &QPushButton::clicked,
+            this,
+            &BlackjackWindow::onHit);
 
-    // Hit button
-    connect(ui->HitButton, &QPushButton::clicked, this, &BlackjackWindow::onHit);
+    connect(ui->StandButton,
+            &QPushButton::clicked,
+            this,
+            &BlackjackWindow::onStand);
+
     connect(ui->playAgainButton,
             &QPushButton::clicked,
             this,
@@ -44,19 +48,21 @@ BlackjackWindow::BlackjackWindow(
             &QPushButton::clicked,
             this,
             &BlackjackWindow::onMainMenu);
+
+    connect(ui->Back_Button,
+            &QPushButton::clicked,
+            this,
+            &BlackjackWindow::backRequested);
+
     ui->playAgainButton->hide();
     ui->mainMenuButton->hide();
 
-    // Stand button
-    connect(ui->StandButton, &QPushButton::clicked, this, &BlackjackWindow::onStand);
-
-    // Start the round in the backend
-    // Display the initial cards
     displayInitialCards();
-
     updatePlayerScore();
+    updateDealerScore();
     updateButtons();
 }
+
 
 // --------------------------------------------------
 // Display initial cards
@@ -64,9 +70,9 @@ BlackjackWindow::BlackjackWindow(
 
 void BlackjackWindow::displayInitialCards()
 {
-    const auto &playerHand = game->getPlayer().getHand();
+    const auto &playerHand = game().getPlayer().getHand();
 
-    const auto &dealerHand = game->getDealer().getHand();
+    const auto &dealerHand = game().getDealer().getHand();
 
     // Display player's initial cards
     for (const Card &card : playerHand) {
@@ -156,7 +162,7 @@ void BlackjackWindow::animateCard(
 
 void BlackjackWindow::updatePlayerScore()
 {
-    int score = game->getPlayerScore();
+    int score = game().getPlayerScore();
 
     ui->playerScoreLabel->setText("Your Score: " + QString::number(score));
 
@@ -169,21 +175,21 @@ void BlackjackWindow::updatePlayerScore()
 
 void BlackjackWindow::updateDealerScore()
 {
-    int score = game->getDealerScore();
+    int score = game().getDealerScore();
 
     qDebug() << "updateDealerScore() called!";
     qDebug() << "Backend dealer score:" << score;
-    qDebug() << "Dealer turn:" << game->isDealerTurn();
-    qDebug() << "Round over:" << game->isRoundOver();
+    qDebug() << "Dealer turn:" << game().isDealerTurn();
+    qDebug() << "Round over:" << game().isRoundOver();
 
-    if (!game->isDealerTurn() && !game->isRoundOver()) {
+    if (!game().isDealerTurn() && !game().isRoundOver()) {
         ui->dealerScoreLabel->setText("Dealer Score: ?");
         return;
     }
 
     ui->dealerScoreLabel->setText(
         "Dealer Score: "
-        + QString::number(game->getDealerScore())
+        + QString::number(game().getDealerScore())
         );
 }
 
@@ -194,16 +200,16 @@ void BlackjackWindow::updateDealerScore()
 
 void BlackjackWindow::updateButtons()
 {
-    bool canInteract = !animationRunning &&!game->isRoundOver();
+    bool canInteract = !animationRunning &&!game().isRoundOver();
 
-    ui->HitButton->setEnabled(canInteract && game->canHit());
+    ui->HitButton->setEnabled(canInteract && game().canHit());
 
-    ui->StandButton->setEnabled(canInteract && game->canStand());
+    ui->StandButton->setEnabled(canInteract && game().canStand());
 }
 
 void BlackjackWindow::onHit()
 {
-    if (animationRunning || !game->canHit()) {
+    if (animationRunning || !game().canHit()) {
         return;
     }
 
@@ -211,7 +217,7 @@ void BlackjackWindow::onHit()
         showActionMessage("Player hits!");
 
         // Backend deals a new card and checks for a bust
-        Card newCard = game->hit();
+        Card newCard = game().hit();
 
         // Animate the card before processing the result
         animateCard(
@@ -222,7 +228,7 @@ void BlackjackWindow::onHit()
                 updatePlayerScore();
 
                 // If player busted, display the result
-                if (game->getPlayerScore() > 21) {
+                if (game().getPlayerScore() > 21) {
 
                     showActionMessage("Player busts!");
 
@@ -236,7 +242,7 @@ void BlackjackWindow::onHit()
                 }
 
                 // If player reached 21, begin dealer turn
-                if (game->isDealerTurn()) {
+                if (game().isDealerTurn()) {
                     beginDealerTurn();
                     return;
                 }
@@ -255,15 +261,15 @@ void BlackjackWindow::onHit()
 
 void BlackjackWindow::finishRoundDisplay()
 {
-    if (!game->isRoundOver()) {
+    if (!game().isRoundOver()) {
         return;
     }
 
     // Reveal the dealer's cards
     revealDealerCards();
 
-    int playerScore = game->getPlayerScore();
-    int dealerScore = game->getDealerScore();
+    int playerScore = game().getPlayerScore();
+    int dealerScore = game().getDealerScore();
 
     QString result;
 
@@ -301,10 +307,10 @@ void BlackjackWindow::finishRoundDisplay()
 
 void BlackjackWindow::afterPlayerHitAnimation()
 {
-    if (game->isRoundOver()) {
+    if (game().isRoundOver()) {
         finishRoundDisplay();
     }
-    else if (game->isDealerTurn()) {
+    else if (game().isDealerTurn()) {
         beginDealerTurn();
     }
     else {
@@ -317,7 +323,7 @@ void BlackjackWindow::afterPlayerHitAnimation()
 // --------------------------------------------------
 void BlackjackWindow::beginDealerTurn()
 {
-    if (!game->isDealerTurn() || game->isRoundOver()) {
+    if (!game().isDealerTurn() || game().isRoundOver()) {
         return;
     }
     revealDealerCards();
@@ -331,7 +337,7 @@ void BlackjackWindow::beginDealerTurn()
 
 void BlackjackWindow::processDealerTurn()
 {
-    if (!game->isDealerTurn() || game->isRoundOver()) {
+    if (!game().isDealerTurn() || game().isRoundOver()) {
         return;
     }
 
@@ -340,14 +346,14 @@ void BlackjackWindow::processDealerTurn()
     }
 
     try {
-        if (game->dealerShouldHit()) {
+        if (game().dealerShouldHit()) {
 
             showActionMessage("Dealer hits!");
 
-            Card newCard = game->dealerHit();
-            qDebug() << "Dealer cards:" << game->getDealer().getHand().size();
-            qDebug() << "Dealer score:" << game->getDealerScore();
-            qDebug() << "Dealer turn:" << game->isDealerTurn();
+            Card newCard = game().dealerHit();
+            qDebug() << "Dealer cards:" << game().getDealer().getHand().size();
+            qDebug() << "Dealer score:" << game().getDealerScore();
+            qDebug() << "Dealer turn:" << game().isDealerTurn();
 
             animateCard(
                 newCard,
@@ -362,14 +368,14 @@ void BlackjackWindow::processDealerTurn()
             updateButtons();
         }
         else {
-            if (game->getDealerScore() > 21) {
+            if (game().getDealerScore() > 21) {
                 showActionMessage("Dealer busts!");
             }
             else {
                 showActionMessage("Dealer stands!");
             }
 
-            game->finishRound();
+            game().finishRound();
 
             QTimer::singleShot(600, this, [this]() {
                 finishRoundDisplay();
@@ -382,8 +388,8 @@ void BlackjackWindow::processDealerTurn()
 }
 void BlackjackWindow::displayRoundResult()
 {
-    int playerScore = game->getPlayerScore();
-    int dealerScore = game->getDealerScore();
+    int playerScore = game().getPlayerScore();
+    int dealerScore = game().getDealerScore();
 
     QString result;
 
@@ -407,14 +413,14 @@ void BlackjackWindow::displayRoundResult()
 }
 void BlackjackWindow::onStand()
 {
-    if (animationRunning || !game->canStand()) {
+    if (animationRunning || !game().canStand()) {
         return;
     }
 
     try {
         showActionMessage("Player stands!");
 
-        game->stand();
+        game().stand();
 
         updateButtons();
 
@@ -430,7 +436,7 @@ void BlackjackWindow::onStand()
 
 void BlackjackWindow::displayMissingDealerCards()
 {
-    const auto &dealerHand = game->getDealer().getHand();
+    const auto &dealerHand = game().getDealer().getHand();
 
     int displayed = dealerCards.size();
 
@@ -445,7 +451,7 @@ void BlackjackWindow::displayMissingDealerCards()
 
 void BlackjackWindow::revealDealerCards()
 {
-    if (!game->isDealerTurn() && !game->isRoundOver()) {
+    if (!game().isDealerTurn() && !game().isRoundOver()) {
         return;
     }
 
@@ -473,12 +479,17 @@ void BlackjackWindow::clearDisplayedCards()
     animationRunning = false;
 }
 
+
 void BlackjackWindow::onPlayAgain()
 {
-    if (animationRunning || !game->isRoundOver()) {
+    if (animationRunning || !manager.isRoundOver()) {
         return;
     }
 
+    // Restart through GameManager
+    manager.restartRound();
+
+    // Reset only the UI
     clearDisplayedCards();
 
     ui->playAgainButton->hide();
@@ -487,14 +498,15 @@ void BlackjackWindow::onPlayAgain()
     ui->playerScoreLabel->setText("Your Score: 0");
     ui->dealerScoreLabel->setText("Dealer Score: ?");
 
-    game->startRound();
-
     displayInitialCards();
 
     updatePlayerScore();
+    updateDealerScore();
     updateButtons();
 
-    showActionMessage("New Blackjack round started!");
+    showActionMessage(
+        "New Blackjack round started!"
+        );
 }
 
 void BlackjackWindow::onMainMenu()

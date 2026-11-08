@@ -20,7 +20,7 @@ public:
 
     int calcScore(
         const std::vector<Card>& hand
-        ) const override;
+        ) const;
 
     void explain_rules() const override;
     void reset() override;

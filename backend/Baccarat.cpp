@@ -1,4 +1,6 @@
 #include "Baccarat.h"
+#include <stdio.h>
+#include <iostream>
 
 Baccarat::Baccarat()
 {

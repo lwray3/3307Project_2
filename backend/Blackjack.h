@@ -22,7 +22,7 @@ public:
     Card dealerHit();
     void finishRound();
     bool isDealerTurn() const;
-    int calcScore(const std::vector<Card>& hand) const override;
+    int calcScore(const std::vector<Card>& hand) const;
     void explain_rules() const override;
     void reset() override;
     bool isRoundOver() const override;
