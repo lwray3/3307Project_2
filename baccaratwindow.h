@@ -9,7 +9,7 @@
 namespace Ui {
 class Dialog;
 }
-
+class QHBoxLayout;
 class BaccaratWindow : public QDialog
 {
     Q_OBJECT
@@ -27,7 +27,8 @@ private slots:
 private:
     Ui::Dialog *ui;
     std::unique_ptr<Baccarat> game;
-
+    QHBoxLayout* playerCardsLayout = nullptr;
+    QHBoxLayout* bankerCardsLayout = nullptr;
 };
 
 #endif

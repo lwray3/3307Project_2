@@ -7,6 +7,9 @@
 #include <QMessageBox>
 #include <QStringList>
 
+#include "backend/CardWidget.h"
+#include <QHBoxLayout>
+
 static QString handToText(const std::vector<Card>& hand)
 {
     QStringList cards;
@@ -34,12 +37,45 @@ static QString handToText(const std::vector<Card>& hand)
     return cards.join("\n");
 }
 
+
+static void displayHand(QHBoxLayout* layout,const std::vector<Card>& hand)
+{
+
+    while (QLayoutItem* item = layout->takeAt(0)) {
+        delete item->widget();
+        delete item;
+    }
+
+    // show card animation
+    for (const Card& card : hand) {
+        CardWidget* cardWidget =
+            new CardWidget(card, layout->parentWidget());
+
+        layout->addWidget(cardWidget);
+    }
+}
+
+
 BaccaratWindow::BaccaratWindow(QWidget *parent)
     : QDialog(parent),
     ui(new Ui::Dialog),
     game(GameFactory::createBaccarat())
 {
     ui->setupUi(this);
+
+
+    playerCardsLayout = new QHBoxLayout(ui->PlayerCards);
+    bankerCardsLayout = new QHBoxLayout(ui->BankerCards);
+
+    playerCardsLayout->setContentsMargins(0, 0, 0, 0);
+    bankerCardsLayout->setContentsMargins(0, 0, 0, 0);
+
+    playerCardsLayout->setSpacing(8);
+    bankerCardsLayout->setSpacing(8);
+
+    playerCardsLayout->setAlignment(Qt::AlignCenter);
+    bankerCardsLayout->setAlignment(Qt::AlignCenter);
+
 
     // back
     connect(ui->Back_Button, &QPushButton::clicked, this, &BaccaratWindow::backRequested);
@@ -54,12 +90,14 @@ void BaccaratWindow::onDeal()
     game->playRound();
 
     // Display the cards
-    ui->label_4->setText(
-        handToText(game->getPlayer().getHand())
+    displayHand(
+        playerCardsLayout,
+        game->getPlayer().getHand()
         );
 
-    ui->label_5->setText(
-        handToText(game->getBanker().getHand())
+    displayHand(
+        bankerCardsLayout,
+        game->getBanker().getHand()
         );
 
     int playerScore = game->getPlayerScore();
