@@ -31,7 +31,7 @@ private:
     Player player;
     Player dealer;
 
-    std::vector<Card> communityCards;
+    std::vector<CardPtr> communityCards;
 
     PokerPhase phase = PokerPhase::PreFlop;
     PokerResult result = PokerResult::None;
@@ -77,7 +77,7 @@ public:
     const Player& getPlayer() const;
     const Player& getDealer() const;
 
-    const std::vector<Card>& getCommunityCards() const;
+    const std::vector<CardPtr>& getCommunityCards() const;
 
     PokerHandRank getPlayerHandRank() const;
     PokerHandRank getDealerHandRank() const;

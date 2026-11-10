@@ -238,7 +238,7 @@ void Poker::showdown()
 
 PokerHandRank Poker::getPlayerHandRank() const
 {
-    std::vector<Card> cards = player.getHand();
+    std::vector<CardPtr> cards = player.getHand();
 
     cards.insert(
         cards.end(),
@@ -251,7 +251,7 @@ PokerHandRank Poker::getPlayerHandRank() const
 
 PokerHandRank Poker::getDealerHandRank() const
 {
-    std::vector<Card> cards = dealer.getHand();
+    std::vector<CardPtr> cards = dealer.getHand();
 
     cards.insert(
         cards.end(),
@@ -307,7 +307,7 @@ const Player& Poker::getDealer() const
     return dealer;
 }
 
-const std::vector<Card>& Poker::getCommunityCards() const
+const std::vector<CardPtr>& Poker::getCommunityCards() const
 {
     return communityCards;
 }

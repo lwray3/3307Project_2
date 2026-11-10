@@ -57,9 +57,8 @@ PokerWindow::PokerWindow(
     updateButtons();
 }
 
-
 void PokerWindow::animateCard(
-    const Card& card,
+    const CardPtr& card,
     QVector<CardWidget*>& collection,
     const QPoint& target,
     bool faceUp,

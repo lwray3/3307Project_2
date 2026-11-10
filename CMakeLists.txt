@@ -49,6 +49,8 @@ qt_add_executable(CasinoGame_3307
     GameWindow.cpp
     backend/pokerEvaluator.h
     backend/pokerEvaluator.cpp
+    backend/CardFactory.h
+    backend/CardFactory.cpp
     
 )
 

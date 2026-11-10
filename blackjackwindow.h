@@ -74,7 +74,7 @@ private:
     void updateButtons();
 
     void animateCard(
-        const Card &card,
+        const CardPtr &card,
         bool isDealer,
         bool faceUp = true,
         std::function<void()> onFinished = {}

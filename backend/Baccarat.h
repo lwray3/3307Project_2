@@ -19,7 +19,7 @@ public:
     void startRound() override;
 
     int calcScore(
-        const std::vector<Card>& hand
+        const std::vector<CardPtr>& hand
         ) const;
 
     void explain_rules() const override;

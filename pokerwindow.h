@@ -69,12 +69,11 @@ private:
 
     // Card animation
     void animateCard(
-        const Card& card,
+        const CardPtr& card,
         QVector<CardWidget*>& collection,
         const QPoint& target,
-        bool faceUp = true,
-        std::function<void()> onFinished = {}
-        );
+        bool faceUp,
+        std::function<void()> onFinished = nullptr);
 
     // UI methods
     void displayInitialCards();

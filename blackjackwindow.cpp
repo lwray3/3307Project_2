@@ -75,7 +75,7 @@ void BlackjackWindow::displayInitialCards()
     const auto &dealerHand = game().getDealer().getHand();
 
     // Display player's initial cards
-    for (const Card &card : playerHand) {
+    for (const CardPtr &card : playerHand) {
         animateCard(card, false, true);
     }
 
@@ -87,12 +87,8 @@ void BlackjackWindow::displayInitialCards()
     }
 }
 
-// --------------------------------------------------
-// Animate a card
-// --------------------------------------------------
-
 void BlackjackWindow::animateCard(
-    const Card& card,
+    const CardPtr& card,
     bool isDealer,
     bool faceUp,
     std::function<void()> onFinished)
@@ -127,14 +123,11 @@ void BlackjackWindow::animateCard(
     int targetY = isDealer ? 145 : 370;
 
     QPoint targetPosition(targetX, targetY);
-
-    // Track running animations
     ++activeAnimations;
     animationRunning = true;
 
     updateButtons();
 
-    // Use the shared animation implementation
     animateDeal(
         cardWidget,
         startPosition,
@@ -156,10 +149,6 @@ void BlackjackWindow::animateCard(
         );
 }
 
-// --------------------------------------------------
-// Update player's score
-// --------------------------------------------------
-
 void BlackjackWindow::updatePlayerScore()
 {
     int score = game().getPlayerScore();
@@ -168,10 +157,6 @@ void BlackjackWindow::updatePlayerScore()
 
     qDebug() << "Player score:" << score;
 }
-
-// --------------------------------------------------
-// Update dealer's score
-// --------------------------------------------------
 
 void BlackjackWindow::updateDealerScore()
 {
@@ -193,11 +178,6 @@ void BlackjackWindow::updateDealerScore()
         );
 }
 
-
-// --------------------------------------------------
-// Update buttons
-// --------------------------------------------------
-
 void BlackjackWindow::updateButtons()
 {
     bool canInteract = !animationRunning &&!game().isRoundOver();
@@ -217,7 +197,7 @@ void BlackjackWindow::onHit()
         showActionMessage("Player hits!");
 
         // Backend deals a new card and checks for a bust
-        Card newCard = game().hit();
+        CardPtr newCard = game().hit();
 
         // Animate the card before processing the result
         animateCard(
@@ -318,9 +298,6 @@ void BlackjackWindow::afterPlayerHitAnimation()
     }
 }
 
-// --------------------------------------------------
-// Stand button
-// --------------------------------------------------
 void BlackjackWindow::beginDealerTurn()
 {
     if (!game().isDealerTurn() || game().isRoundOver()) {
@@ -350,7 +327,7 @@ void BlackjackWindow::processDealerTurn()
 
             showActionMessage("Dealer hits!");
 
-            Card newCard = game().dealerHit();
+            CardPtr newCard = game().dealerHit();
             qDebug() << "Dealer cards:" << game().getDealer().getHand().size();
             qDebug() << "Dealer score:" << game().getDealerScore();
             qDebug() << "Dealer turn:" << game().isDealerTurn();
@@ -430,9 +407,6 @@ void BlackjackWindow::onStand()
         qWarning() << "Stand error:" << e.what();
     }
 }
-// --------------------------------------------------
-// Animate missing dealer cards
-// --------------------------------------------------
 
 void BlackjackWindow::displayMissingDealerCards()
 {
@@ -444,10 +418,6 @@ void BlackjackWindow::displayMissingDealerCards()
         animateCard(dealerHand[i], true, true);
     }
 }
-
-// --------------------------------------------------
-// Reveal dealer's cards
-// --------------------------------------------------
 
 void BlackjackWindow::revealDealerCards()
 {
@@ -517,10 +487,6 @@ void BlackjackWindow::onMainMenu()
 
     emit backRequested();
 }
-
-// --------------------------------------------------
-// Destructor
-// --------------------------------------------------
 
 BlackjackWindow::~BlackjackWindow()
 {

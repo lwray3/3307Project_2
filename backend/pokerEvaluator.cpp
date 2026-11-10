@@ -5,17 +5,17 @@
 #include <stdexcept>
 
 PokerHandRank PokerHandEvaluator::evaluateFive(
-    const std::array<Card, 5>& cards)
+    const std::array<CardPtr, 5>& cards)
 {
     std::array<int, 15> counts{};
     std::vector<int> values;
     values.reserve(5);
 
-    const Suit firstSuit = cards[0].getSuit();
+    const Suit firstSuit = cards[0]->getSuit();
     bool flush = true;
 
-    for (const Card& card : cards) {
-        int value = static_cast<int>(card.getRank());
+    for (CardPtr card : cards) {
+        int value = static_cast<int>(card->getRank());
 
         // Assumes Rank::two = 2 ... Rank::ace = 14
         if (value < 2 || value > 14) {
@@ -25,7 +25,7 @@ PokerHandRank PokerHandEvaluator::evaluateFive(
         counts[value]++;
         values.push_back(value);
 
-        if (card.getSuit() != firstSuit) {
+        if (card->getSuit() != firstSuit) {
             flush = false;
         }
     }
@@ -128,7 +128,7 @@ PokerHandRank PokerHandEvaluator::evaluateFive(
 }
 
 PokerHandRank PokerHandEvaluator::evaluate(
-    const std::vector<Card>& cards)
+    const std::vector<CardPtr>& cards)
 {
     if (cards.size() < 5 || cards.size() > 7) {
         throw std::invalid_argument(
@@ -147,7 +147,7 @@ PokerHandRank PokerHandEvaluator::evaluate(
             for (int c = b + 1; c < n - 2; ++c)
                 for (int d = c + 1; d < n - 1; ++d)
                     for (int e = d + 1; e < n; ++e) {
-                        std::array<Card, 5> hand{
+                        std::array<CardPtr, 5> hand{
                             cards[a], cards[b], cards[c],
                             cards[d], cards[e]
                         };

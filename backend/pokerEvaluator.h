@@ -43,14 +43,14 @@ struct PokerHandRank {
 class PokerHandEvaluator {
 public:
     static PokerHandRank evaluate(
-        const std::vector<Card>& cards
+        const std::vector<CardPtr>& cards
         );
 
     static std::string categoryName(PokerHandCategory category);
 
 private:
     static PokerHandRank evaluateFive(
-        const std::array<Card, 5>& cards
+        const std::array<CardPtr, 5>& cards
         );
 };
 

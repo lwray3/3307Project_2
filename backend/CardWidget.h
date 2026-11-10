@@ -3,26 +3,21 @@
 
 #include <QWidget>
 #include <QLabel>
-
 #include "Card.h"
 
 class CardWidget : public QWidget
 {
-    Q_OBJECT
-
 public:
-    explicit CardWidget(const Card& card,
-                        QWidget *parent = nullptr);
+    explicit CardWidget(CardPtr card, QWidget *parent = nullptr);
 
+    void updateAppearance();
     void setFaceUp(bool faceUp);
 
 private:
-    Card card;
+    CardPtr card;
 
     QLabel *rankLabel;
     QLabel *suitLabel;
-
-    void updateAppearance();
 };
 
-#endif // CARDWIDGET_H
+#endif
