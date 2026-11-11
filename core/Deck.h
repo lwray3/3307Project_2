@@ -8,7 +8,7 @@
 
 class Deck {
 private:
-    std::vector<Card> cards;
+    std::vector<CardPtr> cards;
     std::size_t currCard;
 
 public:
@@ -16,7 +16,7 @@ public:
 
     void shuffle();
     void reset();
-    Card dealCard();
+    CardPtr dealCard();
 };
 
 #endif

@@ -1,13 +1,13 @@
 
 #include "baccaratwindow.h"
 #include "ui_baccaratwindow.h"
-#include "backend/GameFactory.h"
+#include "core/GameFactory.h"
 
 #include <QPushButton>
 #include <QMessageBox>
 #include <QStringList>
 
-#include "backend/CardWidget.h"
+#include "core/CardWidget.h"
 #include <QHBoxLayout>
 
 static QString handToText(const std::vector<Card>& hand)
@@ -38,7 +38,7 @@ static QString handToText(const std::vector<Card>& hand)
 }
 
 
-static void displayHand(QHBoxLayout* layout,const std::vector<Card>& hand)
+static void displayHand(QHBoxLayout* layout,const std::vector<CardPtr>& hand)
 {
 
     while (QLayoutItem* item = layout->takeAt(0)) {
@@ -47,7 +47,7 @@ static void displayHand(QHBoxLayout* layout,const std::vector<Card>& hand)
     }
 
     // show card animation
-    for (const Card& card : hand) {
+    for (const CardPtr& card : hand) {
         CardWidget* cardWidget =
             new CardWidget(card, layout->parentWidget());
 

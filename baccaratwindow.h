@@ -4,7 +4,7 @@
 
 #include <QDialog>
 #include <memory>
-#include "backend/Baccarat.h"
+#include "core/Baccarat.h"
 
 namespace Ui {
 class Dialog;

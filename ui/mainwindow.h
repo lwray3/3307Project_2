@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-
+#include "core/GameManager.h"
 namespace Ui {
 class MainWindow;
 }
@@ -14,6 +14,9 @@ class BaccaratWindow;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+
+private:
+    GameManager manager;
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);

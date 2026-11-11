@@ -19,16 +19,16 @@ public:
     // IGame functions
     void startRound() override;
     bool dealerShouldHit() const;
-    Card dealerHit();
+    CardPtr dealerHit();
     void finishRound();
     bool isDealerTurn() const;
-    int calcScore(const std::vector<Card>& hand) const override;
+    int calcScore(const std::vector<CardPtr>& hand) const;
     void explain_rules() const override;
     void reset() override;
     bool isRoundOver() const override;
 
     // Blackjack-specific functions
-    Card hit();
+    CardPtr hit();
     void stand();
 
     bool canHit() const;

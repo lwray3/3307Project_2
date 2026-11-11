@@ -4,11 +4,11 @@
 Player::Player() {
 }
 
-void Player::addCard(const Card& card) {
+void Player::addCard(CardPtr card) {
     hand.push_back(card);
 }
 
-std::vector<Card> Player::getHand() const {
+std::vector<CardPtr> Player::getHand() const {
     return hand;
 }
 

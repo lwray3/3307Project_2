@@ -1,5 +1,5 @@
 #include "QtCardAnimation.h"
-#include "backend/CardWidget.h"
+#include "core/CardWidget.h"
 #include <QPropertyAnimation>
 #include <QEasingCurve>
 #include <QSequentialAnimationGroup>
@@ -53,7 +53,7 @@ void QtCardAnimation::animateFlip(
     QWidget* card,
     std::function<void()> onFinished)
 {
-    auto* cardWidget = qobject_cast<CardWidget*>(card);
+auto* cardWidget = dynamic_cast<CardWidget*>(card);
 
     if (!cardWidget) {
         if (onFinished) onFinished();

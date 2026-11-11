@@ -1,14 +1,17 @@
+
 #ifndef BLACKJACKWINDOW_H
 #define BLACKJACKWINDOW_H
+
 #include <functional>
+#include <stdexcept>
+
 #include <QPoint>
 #include <QVector>
 #include <QWidget>
 
-#include <memory>
-
-#include "backend/Blackjack.h"
-#include "backend/CardWidget.h"
+#include "core/Blackjack.h"
+#include "core/CardWidget.h"
+#include "core/GameManager.h"
 #include "GameWindow.h"
 
 namespace Ui {
@@ -20,7 +23,11 @@ class BlackjackWindow : public GameWindow
     Q_OBJECT
 
 public:
-    explicit BlackjackWindow(std::unique_ptr<Blackjack> game, QWidget *parent = nullptr);
+    // GameManager owns the game
+    explicit BlackjackWindow(
+        GameManager& manager,
+        QWidget *parent = nullptr
+        );
 
     ~BlackjackWindow();
 
@@ -33,8 +40,22 @@ private slots:
 private:
     Ui::BlackjackWindow *ui;
 
-    // Backend game created by GameFactory
-    std::unique_ptr<Blackjack> game;
+    // Reference to GameManager
+    GameManager& manager;
+
+    // Access the active Blackjack backend
+    Blackjack& game() const {
+        Blackjack* blackjack =
+            dynamic_cast<Blackjack*>(manager.getGame());
+
+        if (!blackjack) {
+            throw std::logic_error(
+                "No active Blackjack game"
+                );
+        }
+
+        return *blackjack;
+    }
 
     // Visual card widgets
     QVector<CardWidget *> playerCards;
@@ -52,7 +73,13 @@ private:
     void updateDealerScore();
     void updateButtons();
 
-    void animateCard(const Card &card, bool isDealer, bool faceUp = true, std::function<void()> onFinished = {});
+    void animateCard(
+        const CardPtr &card,
+        bool isDealer,
+        bool faceUp = true,
+        std::function<void()> onFinished = {}
+        );
+
     void afterPlayerHitAnimation();
     void displayMissingDealerCards();
     void revealDealerCards();
@@ -61,6 +88,5 @@ private:
     void clearDisplayedCards();
     void afterPlayerAnimation();
 };
-
 
 #endif

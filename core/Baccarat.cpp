@@ -1,4 +1,6 @@
 #include "Baccarat.h"
+#include <stdio.h>
+#include <iostream>
 
 Baccarat::Baccarat()
 {
@@ -23,13 +25,13 @@ void Baccarat::startRound()
 }
 
 int Baccarat::calcScore(
-    const std::vector<Card>& hand
+    const std::vector<CardPtr>& hand
     ) const
 {
     int total = 0;
 
-    for (const Card& card : hand) {
-        int value = static_cast<int>(card.getRank());
+    for (CardPtr card : hand) {
+        int value = static_cast<int>(card->getRank());
 
         if (value == 14) {
             value = 1;  // Ace
@@ -63,12 +65,12 @@ void Baccarat::playRound()
 
         // Player draws on totals of 0-5.
         if (playerScore <= 5) {
-            Card thirdCard = deck.dealCard();
+            CardPtr thirdCard = deck.dealCard();
             player.addCard(thirdCard);
             playerDrew = true;
 
             thirdCardValue = static_cast<int>(
-                thirdCard.getRank()
+                thirdCard->getRank()
                 );
 
             if (thirdCardValue == 14) {
