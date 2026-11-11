@@ -15,7 +15,6 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets)
 qt_standard_project_setup()
 
 qt_add_executable(CasinoGame_3307
-
     main.cpp
     core/Blackjack.cpp
     core/Blackjack.h
@@ -60,6 +59,7 @@ qt_add_executable(CasinoGame_3307
 
     ui/GameWindow.h
     ui/GameWindow.cpp
+    README.md
 )
 
 # Allow source files to include headers from both folders

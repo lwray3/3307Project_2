@@ -3,7 +3,6 @@
 #include "blackjackwindow.h"
 #include "pokerwindow.h"
 #include "ui_mainwindow.h"
-
 #include <QDebug>
 #include <QPushButton>
 #include <memory>
@@ -15,40 +14,22 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     connect(ui->playBlackjack, &QPushButton::clicked, this, &MainWindow::openBlackjack);
-
     connect(ui->playPoker, &QPushButton::clicked, this, &MainWindow::openPoker);
 }
-
-
-
 void MainWindow::openBlackjack()
 {
     qDebug() << "Play Blackjack button clicked!";
-
-    // Only create the game and window if they don't exist
     if (!blackjackWindow) {
-
         qDebug() << "Creating blackjack game";
-
-        // Step 1: Factory creates the Blackjack object
         auto blackjack = GameFactory::createBlackjack();
-
-        // Step 2: Transfer ownership to GameManager
         manager.setGame(std::move(blackjack));
-
-        // Step 3: GameManager starts the Blackjack round
         manager.startRound();
-
         qDebug() << "Creating blackjack window";
-
-        // Step 4: Pass GameManager to BlackjackWindow
         blackjackWindow = new BlackjackWindow(
             manager,
             this
             );
-        // Make BlackjackWindow a separate window
         blackjackWindow->setWindowFlag(Qt::Window, true);
-        // Step 5: Handle returning to the main menu
         connect(
             blackjackWindow,
             &GameWindow::backRequested,
@@ -63,8 +44,6 @@ void MainWindow::openBlackjack()
                 this->activateWindow();
             }
             );
-
-        // Step 6: Reset pointer if window is destroyed
         connect(
             blackjackWindow,
             &QObject::destroyed,
@@ -74,44 +53,23 @@ void MainWindow::openBlackjack()
             }
             );
     }
-
-    // Step 7: Show Blackjack window
     blackjackWindow->show();
     blackjackWindow->raise();
     blackjackWindow->activateWindow();
-
-    // Step 8: Hide main menu
     this->hide();
 }
-
-
-
 void MainWindow::openPoker()
 {
     qDebug() << "Play Poker button clicked!";
-
-    // Only create the game and window if they don't exist
     if (!pokerWindow) {
-
         qDebug() << "Creating Poker game";
-
-        // Step 1: GameFactory creates the Poker object
         auto poker = GameFactory::createPoker();
-
-        // Step 2: GameManager takes ownership
         manager.setGame(std::move(poker));
-
-        // Step 3: Start the Poker round
-        // Only if the Poker constructor hasn't started it
         manager.startRound();
-
-        // Step 4: Create PokerWindow using GameManager
         pokerWindow = new PokerWindow(manager, this);
 
         // Make PokerWindow a separate window
         pokerWindow->setWindowFlag(Qt::Window, true);
-
-        // Step 5: Handle returning to main menu
         connect(
             pokerWindow,
             &GameWindow::backRequested,
@@ -130,8 +88,6 @@ void MainWindow::openPoker()
                 this->activateWindow();
             }
             );
-
-        // Step 6: Reset pointer if window is destroyed
         connect(
             pokerWindow,
             &QObject::destroyed,
@@ -141,13 +97,9 @@ void MainWindow::openPoker()
             }
             );
     }
-
-    // Step 7: Display PokerWindow
     pokerWindow->show();
     pokerWindow->raise();
     pokerWindow->activateWindow();
-
-    // Step 8: Hide MainWindow
     this->hide();
 }
 

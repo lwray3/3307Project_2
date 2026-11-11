@@ -1,6 +1,5 @@
 #ifndef QTCARDANIMATION_H
 #define QTCARDANIMATION_H
-
 #include "IGameAnimation.h"
 
 class QtCardAnimation : public IGameAnimation {

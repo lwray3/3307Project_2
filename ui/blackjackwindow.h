@@ -21,14 +21,11 @@ class BlackjackWindow;
 class BlackjackWindow : public GameWindow
 {
     Q_OBJECT
-
 public:
-    // GameManager owns the game
     explicit BlackjackWindow(
-        GameManager& manager,
+        GameManager& manager, //gameManager is in charge of the game
         QWidget *parent = nullptr
         );
-
     ~BlackjackWindow();
 
 private slots:
@@ -39,15 +36,10 @@ private slots:
 
 private:
     Ui::BlackjackWindow *ui;
-
-    // Reference to GameManager
     GameManager& manager;
-
-    // Access the active Blackjack backend
     Blackjack& game() const {
         Blackjack* blackjack =
             dynamic_cast<Blackjack*>(manager.getGame());
-
         if (!blackjack) {
             throw std::logic_error(
                 "No active Blackjack game"
@@ -56,30 +48,22 @@ private:
 
         return *blackjack;
     }
-
-    // Visual card widgets
     QVector<CardWidget *> playerCards;
     QVector<CardWidget *> dealerCards;
-
-    // Animation management
     int activeAnimations = 0;
     bool animationRunning = false;
-
-    // UI methods
     void displayInitialCards();
     void beginDealerTurn();
     void processDealerTurn();
     void updatePlayerScore();
     void updateDealerScore();
     void updateButtons();
-
     void animateCard(
         const CardPtr &card,
         bool isDealer,
         bool faceUp = true,
         std::function<void()> onFinished = {}
         );
-
     void afterPlayerHitAnimation();
     void displayMissingDealerCards();
     void revealDealerCards();

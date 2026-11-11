@@ -10,15 +10,13 @@ CardPtr CardFactory::getCard(Rank rank, Suit suit)
 
     auto it = cardPool.find(key);
 
-    // If the card exists, return the shared object.
-    if (it != cardPool.end()) {
+
+    if (it != cardPool.end()) { // If the card exists, return the shared object.
         return it->second;
     }
 
-    // Otherwise, create the card once.
-    CardPtr newCard =
-        std::make_shared<const Card>(rank, suit);
 
+    CardPtr newCard = std::make_shared<const Card>(rank, suit);
     cardPool[key] = newCard;
 
     return newCard;
