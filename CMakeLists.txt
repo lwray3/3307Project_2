@@ -1,4 +1,3 @@
-
 cmake_minimum_required(VERSION 3.16)
 
 project(CasinoGame_3307 VERSION 0.1 LANGUAGES CXX)
@@ -71,8 +70,8 @@ qt_add_executable(CasinoGame_3307
 
     ui/GameWindow.cpp
     ui/GameWindow.h
-
-
+    README.md
+)
 )
 
 # Allow source files to include headers from both folders

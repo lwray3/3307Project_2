@@ -1,8 +1,6 @@
 #include "pokerwindow.h"
 #include "ui_pokerwindow.h"
 #include "core/Poker.h"
-
-
 #include <QPushButton>
 #include <QDebug>
 #include <QString>
@@ -43,16 +41,11 @@ PokerWindow::PokerWindow(
 
     connect(ui->Back_Button, &QPushButton::clicked,
             this, &PokerWindow::onMainMenu);
-
     ui->playAgainButton->hide();
     ui->mainMenuButton->hide();
-
     ui->playerHandLabel->clear();
     ui->dealerHandLabel->clear();
-
-    // Poker constructor already called startRound().
     displayInitialCards();
-
     updateLabels();
     updateButtons();
 }
@@ -65,17 +58,12 @@ void PokerWindow::animateCard(
     std::function<void()> onFinished)
 {
     CardWidget* widget = new CardWidget(card, this);
-
     widget->setFaceUp(faceUp);
     collection.append(widget);
-
     QPoint start(width() - 110, 80);
-
     ++activeAnimations;
     animationRunning = true;
-
     updateButtons();
-
     animateDeal(
         widget,
         start,
@@ -92,8 +80,6 @@ void PokerWindow::animateCard(
         }
         );
 }
-
-
 void PokerWindow::displayInitialCards()
 {
     const auto& playerHand = game().getPlayer().getHand();
@@ -124,9 +110,7 @@ void PokerWindow::onCall()
     if (!game().canCall()) {
         return;
     }
-
     game().call();
-
     updateButtons();
     updatePlayerStats();
 }
@@ -134,34 +118,23 @@ void PokerWindow::onCall()
 void PokerWindow::onRaise()
 {
     int raiseAmount = ui->raiseAmountSpinBox->value();
-
     if (!game().canRaise(raiseAmount)) {
         return;
     }
-
     game().raise(raiseAmount);
-
     updatePlayerStats();
     updateButtons();
 }
-
-
 void PokerWindow::updatePlayerStats()
 {
-
-    // Update player's remaining chips
     ui->playerChipsLabel->setText(
         QString("Your Chips: $%1")
             .arg(game().getPlayerChips())
         );
-
-    // Update computer's remaining chips
     ui->dealerChipsLabel->setText(
         QString("Computer Chips: $%1")
             .arg(game().getDealerChips())
         );
-
-    // Update total pot
     ui->potLabel->setText(
         QString("Pot: $%1")
             .arg(game().getPot())
@@ -171,17 +144,13 @@ void PokerWindow::updatePlayerStats()
 void PokerWindow::displayNewCommunityCards()
 {
     const auto& community = game().getCommunityCards();
-
     const int spacing = 82;
     const int totalWidth = 5 * 72 + 4 * 10;
     const int startX = (width() - totalWidth) / 2;
-
     int displayed = communityCardWidgets.size();
-
     for (int i = displayed;
          i < static_cast<int>(community.size());
          ++i) {
-
         animateCard(
             community[i],
             communityCardWidgets,
@@ -190,7 +159,6 @@ void PokerWindow::displayNewCommunityCards()
             );
     }
 }
-
 
 void PokerWindow::onCheck()
 {
@@ -214,7 +182,6 @@ void PokerWindow::onBet()
     if (animationRunning || !game().canBet()) {
         return;
     }
-
     try {
         showActionMessage("Player bets 20. Computer calls.");
 
@@ -231,7 +198,6 @@ void PokerWindow::onFold()
     if (animationRunning || game().isRoundOver()) {
         return;
     }
-
     try {
         game().fold();
 
@@ -251,7 +217,6 @@ void PokerWindow::afterBettingAction()
         finishRoundDisplay();
         return;
     }
-
     displayNewCommunityCards();
     updateButtons();
 }
@@ -305,7 +270,6 @@ void PokerWindow::finishRoundDisplay()
     }
 
     updateLabels();
-
     QString message;
 
     if (game().getResult() == PokerResult::PlayerWins) {
@@ -317,12 +281,9 @@ void PokerWindow::finishRoundDisplay()
     else {
         message = "It's a tie!";
     }
-
-    // A fold does not require hand evaluation.
     if (game().getCommunityCards().size() == 5) {
         const auto playerRank = game().getPlayerHandRank();
         const auto dealerRank = game().getDealerHandRank();
-
         ui->playerHandLabel->setText(
             QString::fromStdString(
                 PokerHandEvaluator::categoryName(
@@ -341,20 +302,15 @@ void PokerWindow::finishRoundDisplay()
     }
 
     showResultMessage(message);
-
     updateButtons();
-
     ui->playAgainButton->show();
     ui->mainMenuButton->show();
-
-    // Reveal the computer's private cards.
     for (CardWidget* card : dealerCards) {
         if (card) {
             card->setFaceUp(true);
         }
     }
 }
-
 
 void PokerWindow::clearDisplayedCards()
 {
@@ -369,11 +325,9 @@ void PokerWindow::clearDisplayedCards()
     for (CardWidget* card : communityCardWidgets) {
         delete card;
     }
-
     playerCards.clear();
     dealerCards.clear();
     communityCardWidgets.clear();
-
     activeAnimations = 0;
     animationRunning = false;
 }
@@ -385,15 +339,11 @@ void PokerWindow::onPlayAgain()
     }
 
     clearDisplayedCards();
-
     ui->playAgainButton->hide();
     ui->mainMenuButton->hide();
-
     ui->playerHandLabel->clear();
     ui->dealerHandLabel->clear();
-
     manager.startRound();
-
     displayInitialCards();
     updateLabels();
     updateButtons();
@@ -406,7 +356,6 @@ void PokerWindow::onMainMenu()
     if (animationRunning) {
         return;
     }
-
     emit backRequested();
 }
 

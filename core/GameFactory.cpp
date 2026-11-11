@@ -1,5 +1,4 @@
 #include "GameFactory.h"
-
 #include <stdexcept>
 
 std::unique_ptr<Blackjack> GameFactory::createBlackjack()

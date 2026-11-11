@@ -1,15 +1,11 @@
-
 #ifndef POKERWINDOW_H
 #define POKERWINDOW_H
-
 #include "GameWindow.h"
 #include "core/Poker.h"
 #include "core/CardWidget.h"
 #include "core/GameManager.h"
-
 #include <QVector>
 #include <QPoint>
-
 #include <functional>
 #include <stdexcept>
 
@@ -40,11 +36,7 @@ private slots:
 
 private:
     Ui::PokerWindow* ui;
-
-    // GameManager owns the Poker object
-    GameManager& manager;
-
-    // Access the active Poker game
+    GameManager& manager; //GameManager is also in charge of Poker
     Poker& game() const {
         Poker* poker =
             dynamic_cast<Poker*>(manager.getGame());
@@ -57,17 +49,11 @@ private:
 
         return *poker;
     }
-
-    // Card widgets
     QVector<CardWidget*> playerCards;
     QVector<CardWidget*> dealerCards;
     QVector<CardWidget*> communityCardWidgets;
-
-    // Animation management
     int activeAnimations = 0;
     bool animationRunning = false;
-
-    // Card animation
     void animateCard(
         const CardPtr& card,
         QVector<CardWidget*>& collection,
@@ -75,7 +61,6 @@ private:
         bool faceUp,
         std::function<void()> onFinished = nullptr);
 
-    // UI methods
     void displayInitialCards();
     void displayNewCommunityCards();
     void afterBettingAction();
