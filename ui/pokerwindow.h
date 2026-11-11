@@ -3,9 +3,9 @@
 #define POKERWINDOW_H
 
 #include "GameWindow.h"
-#include "backend/Poker.h"
-#include "backend/CardWidget.h"
-#include "backend/GameManager.h"
+#include "core/Poker.h"
+#include "core/CardWidget.h"
+#include "core/GameManager.h"
 
 #include <QVector>
 #include <QPoint>

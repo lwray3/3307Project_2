@@ -1,6 +1,6 @@
 #include "pokerwindow.h"
 #include "ui_pokerwindow.h"
-#include "backend/Poker.h"
+#include "core/Poker.h"
 
 
 #include <QPushButton>

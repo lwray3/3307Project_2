@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "backend/GameFactory.h"
+#include "core/GameFactory.h"
 #include "blackjackwindow.h"
 #include "pokerwindow.h"
 #include "ui_mainwindow.h"

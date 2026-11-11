@@ -1,5 +1,5 @@
 #include "QtCardAnimation.h"
-#include "backend/CardWidget.h"
+#include "core/CardWidget.h"
 #include <QPropertyAnimation>
 #include <QEasingCurve>
 #include <QSequentialAnimationGroup>
