@@ -1,15 +1,19 @@
+
 #include "CardWidget.h"
 
 #include <QVBoxLayout>
 #include <QString>
 #include <QStyle>
+#include <utility>
 
-CardWidget::CardWidget(const Card& card, QWidget *parent)
-    : QWidget(parent), card(card)
+// Constructor receives a shared pointer to a Card
+CardWidget::CardWidget(CardPtr card, QWidget *parent)
+    : QWidget(parent), card(std::move(card))
 {
     setFixedSize(72, 102);
     setObjectName("playingCard");
     setAttribute(Qt::WA_StyledBackground, true);
+
     rankLabel = new QLabel(this);
     suitLabel = new QLabel(this);
 
@@ -29,7 +33,7 @@ void CardWidget::updateAppearance()
 {
     QString rank;
 
-    switch (card.getRank()) {
+    switch (card->getRank()) {
     case Rank::two: rank = "2"; break;
     case Rank::three: rank = "3"; break;
     case Rank::four: rank = "4"; break;
@@ -47,7 +51,7 @@ void CardWidget::updateAppearance()
 
     QString suit;
 
-    switch (card.getSuit()) {
+    switch (card->getSuit()) {
     case Suit::hearts: suit = "♥"; break;
     case Suit::diamonds: suit = "♦"; break;
     case Suit::clubs: suit = "♣"; break;
@@ -55,8 +59,8 @@ void CardWidget::updateAppearance()
     }
 
     QString color =
-        (card.getSuit() == Suit::hearts ||
-         card.getSuit() == Suit::diamonds)
+        (card->getSuit() == Suit::hearts ||
+         card->getSuit() == Suit::diamonds)
             ? "#d81e3f" : "#203044";
 
     // Style the card itself
@@ -105,7 +109,8 @@ void CardWidget::setFaceUp(bool faceUp)
 
     if (faceUp) {
         updateAppearance();
-    } else {
+    }
+    else {
         setStyleSheet(
             "QWidget#playingCard {"
             " background-color: #203c55;"

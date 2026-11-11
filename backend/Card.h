@@ -1,6 +1,6 @@
-
 #ifndef CARD_H
 #define CARD_H
+#include <memory>
 
 enum class Rank {
     two = 2,
@@ -36,5 +36,5 @@ public:
     Rank getRank() const;
     Suit getSuit() const;
 };
-
+using CardPtr = std::shared_ptr<const Card>;
 #endif

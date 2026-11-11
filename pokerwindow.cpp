@@ -1,72 +1,417 @@
 #include "pokerwindow.h"
 #include "ui_pokerwindow.h"
+#include "backend/Poker.h"
 
-#include <QMessageBox>
+
 #include <QPushButton>
-#include <QSpinBox>
+#include <QDebug>
+#include <QString>
+#include <stdexcept>
+#include <utility>
 
-PokerWindow::PokerWindow(QWidget *parent)
-    : QWidget(parent)
-    , ui(new Ui::PokerWindow)
+PokerWindow::PokerWindow(
+    GameManager& manager,
+    QWidget* parent)
+    : GameWindow(parent),
+    ui(new Ui::PokerWindow),
+    manager(manager)
 {
     ui->setupUi(this);
-    setWindowTitle("Texas Hold'em Poker");
 
-    connect(ui->FoldButton, &QPushButton::clicked, this, &PokerWindow::onFold);
-    connect(ui->CheckButton, &QPushButton::clicked, this, &PokerWindow::onCheckCall);
-    connect(ui->RaiseButton, &QPushButton::clicked, this, &PokerWindow::onRaise);
-    connect(ui->RulesButton, &QPushButton::clicked, this, &PokerWindow::onShowRules);
+    setActionLabel(ui->actionLabel);
 
-    connect(ui->Back, &QPushButton::clicked, this, &PokerWindow::backRequested);
+    connect(ui->CheckButton, &QPushButton::clicked,
+            this, &PokerWindow::onCheck);
 
-    // Poker::play() currently reads from std::cin and runs a whole match.
-    // Do NOT call it from a Qt button: it would block the UI event loop.
-    setBettingEnabled(false);
+    connect(ui->CallButton, &QPushButton::clicked,
+            this, &PokerWindow::onCall);
+
+    connect(ui->RaiseButton, &QPushButton::clicked,
+            this, &PokerWindow::onRaise);
+
+    connect(ui->BetButton, &QPushButton::clicked,
+            this, &PokerWindow::onBet);
+
+    connect(ui->FoldButton, &QPushButton::clicked,
+            this, &PokerWindow::onFold);
+
+    connect(ui->playAgainButton, &QPushButton::clicked,
+            this, &PokerWindow::onPlayAgain);
+
+    connect(ui->mainMenuButton, &QPushButton::clicked,
+            this, &PokerWindow::onMainMenu);
+
+    connect(ui->Back_Button, &QPushButton::clicked,
+            this, &PokerWindow::onMainMenu);
+
+    ui->playAgainButton->hide();
+    ui->mainMenuButton->hide();
+
+    ui->playerHandLabel->clear();
+    ui->dealerHandLabel->clear();
+
+    // Poker constructor already called startRound().
+    displayInitialCards();
+
+    updateLabels();
+    updateButtons();
 }
 
-PokerWindow::~PokerWindow()
+void PokerWindow::animateCard(
+    const CardPtr& card,
+    QVector<CardWidget*>& collection,
+    const QPoint& target,
+    bool faceUp,
+    std::function<void()> onFinished)
 {
-    delete ui;
+    CardWidget* widget = new CardWidget(card, this);
+
+    widget->setFaceUp(faceUp);
+    collection.append(widget);
+
+    QPoint start(width() - 110, 80);
+
+    ++activeAnimations;
+    animationRunning = true;
+
+    updateButtons();
+
+    animateDeal(
+        widget,
+        start,
+        target,
+        [this, onFinished = std::move(onFinished)]() mutable {
+            --activeAnimations;
+
+            animationRunning = (activeAnimations > 0);
+            updateButtons();
+
+            if (onFinished) {
+                onFinished();
+            }
+        }
+        );
 }
 
-void PokerWindow::setBettingEnabled(bool enabled)
+
+void PokerWindow::displayInitialCards()
 {
-    ui->FoldButton->setEnabled(enabled);
-    ui->CheckButton->setEnabled(enabled);
-    ui->RaiseButton->setEnabled(enabled);
-    ui->RaiseSpinBox->setEnabled(enabled);
+    const auto& playerHand = game().getPlayer().getHand();
+    const auto& dealerHand = game().getDealer().getHand();
+
+    const int spacing = 82;
+    const int startX = (width() - 2 * 72 - 10) / 2;
+
+    for (int i = 0; i < 2; ++i) {
+        animateCard(
+            playerHand[i],
+            playerCards,
+            QPoint(startX + i * spacing, 390),
+            true
+            );
+
+        animateCard(
+            dealerHand[i],
+            dealerCards,
+            QPoint(startX + i * spacing, 85),
+            false
+            );
+    }
 }
 
-void PokerWindow::onStartHand()
+void PokerWindow::onCall()
 {
-    emit startHandRequested();
-    // Once the backend starts a hand, update labels/cards and enable legal actions.
+    if (!game().canCall()) {
+        return;
+    }
+
+    game().call();
+
+    updateButtons();
+    updatePlayerStats();
+}
+
+void PokerWindow::onRaise()
+{
+    int raiseAmount = ui->raiseAmountSpinBox->value();
+
+    if (!game().canRaise(raiseAmount)) {
+        return;
+    }
+
+    game().raise(raiseAmount);
+
+    updatePlayerStats();
+    updateButtons();
+}
+
+
+void PokerWindow::updatePlayerStats()
+{
+
+    // Update player's remaining chips
+    ui->playerChipsLabel->setText(
+        QString("Your Chips: $%1")
+            .arg(game().getPlayerChips())
+        );
+
+    // Update computer's remaining chips
+    ui->dealerChipsLabel->setText(
+        QString("Computer Chips: $%1")
+            .arg(game().getDealerChips())
+        );
+
+    // Update total pot
+    ui->potLabel->setText(
+        QString("Pot: $%1")
+            .arg(game().getPot())
+        );
+}
+
+void PokerWindow::displayNewCommunityCards()
+{
+    const auto& community = game().getCommunityCards();
+
+    const int spacing = 82;
+    const int totalWidth = 5 * 72 + 4 * 10;
+    const int startX = (width() - totalWidth) / 2;
+
+    int displayed = communityCardWidgets.size();
+
+    for (int i = displayed;
+         i < static_cast<int>(community.size());
+         ++i) {
+
+        animateCard(
+            community[i],
+            communityCardWidgets,
+            QPoint(startX + i * spacing, 240),
+            true
+            );
+    }
+}
+
+
+void PokerWindow::onCheck()
+{
+    if (animationRunning || !game().canCheck()) {
+        return;
+    }
+
+    try {
+        showActionMessage("Player checks. Computer checks.");
+
+        game().check();
+        afterBettingAction();
+    }
+    catch (const std::exception& e) {
+        qWarning() << "Poker check error:" << e.what();
+    }
+}
+
+void PokerWindow::onBet()
+{
+    if (animationRunning || !game().canBet()) {
+        return;
+    }
+
+    try {
+        showActionMessage("Player bets 20. Computer calls.");
+
+        game().bet();
+        afterBettingAction();
+    }
+    catch (const std::exception& e) {
+        qWarning() << "Poker bet error:" << e.what();
+    }
 }
 
 void PokerWindow::onFold()
 {
-    emit foldRequested();
-}
-void PokerWindow::onCheckCall()
-{
-    emit checkCallRequested();
-}
-void PokerWindow::onRaise()
-{
-    emit raiseRequested(ui->RaiseSpinBox->value());
+    if (animationRunning || game().isRoundOver()) {
+        return;
+    }
+
+    try {
+        game().fold();
+
+        showActionMessage("Player folds!");
+        finishRoundDisplay();
+    }
+    catch (const std::exception& e) {
+        qWarning() << "Poker fold error:" << e.what();
+    }
 }
 
-void PokerWindow::onShowRules()
+void PokerWindow::afterBettingAction()
 {
-    QMessageBox::information(
-        this,
-        "Texas Hold'em Rules",
-        "Heads-up Texas Hold'em: you versus the computer dealer.\n\n"
-        "Each player receives two private cards. Five community cards are "
-        "revealed over the flop (3), turn (1), and river (1).\n\n"
-        "Choose fold, check/call, or raise when it is your turn. "
-        "Make the strongest five-card hand from your two cards and the board.\n\n"
-        "Hand rankings (strongest first): straight flush, four of a kind, "
-        "full house, flush, straight, three of a kind, two pair, pair, high card.\n\n"
-        "Starting stacks: 1000 chips each. Blinds: 10 / 20.");
+    updateLabels();
+
+    if (game().isRoundOver()) {
+        finishRoundDisplay();
+        return;
+    }
+
+    displayNewCommunityCards();
+    updateButtons();
+}
+
+void PokerWindow::updateLabels()
+{
+    updatePlayerStats();
+}
+
+
+void PokerWindow::updateButtons()
+{
+    bool canInteract =
+        !animationRunning && !game().isRoundOver();
+
+    ui->FoldButton->setEnabled(
+        canInteract && game().canFold()
+        );
+
+    ui->CheckButton->setEnabled(
+        canInteract && game().canCheck()
+        );
+
+    ui->CallButton->setEnabled(
+        canInteract && game().canCall()
+        );
+
+    ui->RaiseButton->setEnabled(
+        canInteract &&
+        game().canRaise(ui->raiseAmountSpinBox->value())
+        );
+
+
+    ui->BetButton->setEnabled(
+        canInteract && game().canBet()
+        );
+
+    if (game().getCurrentBet() == 0) {
+        ui->RaiseButton->setText("Bet");
+    } else {
+        ui->RaiseButton->setText("Raise");
+    }
+}
+
+
+
+void PokerWindow::finishRoundDisplay()
+{
+    if (!game().isRoundOver()) {
+        return;
+    }
+
+    updateLabels();
+
+    QString message;
+
+    if (game().getResult() == PokerResult::PlayerWins) {
+        message = "You win!";
+    }
+    else if (game().getResult() == PokerResult::DealerWins) {
+        message = "Computer wins!";
+    }
+    else {
+        message = "It's a tie!";
+    }
+
+    // A fold does not require hand evaluation.
+    if (game().getCommunityCards().size() == 5) {
+        const auto playerRank = game().getPlayerHandRank();
+        const auto dealerRank = game().getDealerHandRank();
+
+        ui->playerHandLabel->setText(
+            QString::fromStdString(
+                PokerHandEvaluator::categoryName(
+                    playerRank.category
+                    )
+                )
+            );
+
+        ui->dealerHandLabel->setText(
+            QString::fromStdString(
+                PokerHandEvaluator::categoryName(
+                    dealerRank.category
+                    )
+                )
+            );
+    }
+
+    showResultMessage(message);
+
+    updateButtons();
+
+    ui->playAgainButton->show();
+    ui->mainMenuButton->show();
+
+    // Reveal the computer's private cards.
+    for (CardWidget* card : dealerCards) {
+        if (card) {
+            card->setFaceUp(true);
+        }
+    }
+}
+
+
+void PokerWindow::clearDisplayedCards()
+{
+    for (CardWidget* card : playerCards) {
+        delete card;
+    }
+
+    for (CardWidget* card : dealerCards) {
+        delete card;
+    }
+
+    for (CardWidget* card : communityCardWidgets) {
+        delete card;
+    }
+
+    playerCards.clear();
+    dealerCards.clear();
+    communityCardWidgets.clear();
+
+    activeAnimations = 0;
+    animationRunning = false;
+}
+
+void PokerWindow::onPlayAgain()
+{
+    if (animationRunning || !game().isRoundOver()) {
+        return;
+    }
+
+    clearDisplayedCards();
+
+    ui->playAgainButton->hide();
+    ui->mainMenuButton->hide();
+
+    ui->playerHandLabel->clear();
+    ui->dealerHandLabel->clear();
+
+    manager.startRound();
+
+    displayInitialCards();
+    updateLabels();
+    updateButtons();
+
+    showActionMessage("New Poker round started!");
+}
+
+void PokerWindow::onMainMenu()
+{
+    if (animationRunning) {
+        return;
+    }
+
+    emit backRequested();
+}
+
+
+PokerWindow::~PokerWindow()
+{
+    delete ui;
 }

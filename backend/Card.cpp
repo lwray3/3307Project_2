@@ -1,4 +1,3 @@
-
 #include "Card.h"
 
 Card::Card(Rank rank, Suit suit)

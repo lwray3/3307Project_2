@@ -47,6 +47,10 @@ qt_add_executable(CasinoGame_3307
     QtCardAnimation.cpp
     GameWindow.h
     GameWindow.cpp
+    backend/pokerEvaluator.h
+    backend/pokerEvaluator.cpp
+    backend/CardFactory.h
+    backend/CardFactory.cpp
     
 )
 

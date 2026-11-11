@@ -7,16 +7,16 @@
 
 class Player {
 private:
-    std::vector<Card> hand;
+    std::vector<CardPtr> hand;
     int wins = 0;
     int losses = 0;
 
 public:
     Player();
 
-    void addCard(const Card& card);
+    void addCard(CardPtr card);
 
-    std::vector<Card> getHand() const;
+    std::vector<CardPtr> getHand() const;
 
     void clearHand();
 

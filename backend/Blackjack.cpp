@@ -25,7 +25,7 @@ void Blackjack::startRound() {
 
 
 // Player requests another card
-Card Blackjack::hit()
+CardPtr Blackjack::hit()
 {
     // Prevent hitting after the round has ended
     if (!canHit()) {
@@ -33,7 +33,7 @@ Card Blackjack::hit()
     }
 
     // Deals a new card
-    Card new_card = deck.dealCard();
+    CardPtr new_card = deck.dealCard();
 
     // Add the card to the player's hand
     player.addCard(new_card);
@@ -79,13 +79,13 @@ int Blackjack::getPlayerScore() const {
     return calcScore(player.getHand());
 }
 
-Card Blackjack::dealerHit()
+CardPtr Blackjack::dealerHit()
 {
     if (!dealerShouldHit()) {
         throw std::logic_error("Dealer cannot hit");
     }
 
-    Card newCard = deck.dealCard();
+    CardPtr newCard = deck.dealCard();
 
     dealer.addCard(newCard);
 
@@ -170,29 +170,29 @@ void Blackjack::explain_rules() const {
 }
 
 // Calculate the score of a hand
-int Blackjack::calcScore(const std::vector<Card>& hand) const {
+int Blackjack::calcScore(const std::vector<CardPtr>& hand) const
+{
     int score = 0;
     int aces = 0;
 
-    for (const auto& card : hand) {
-        int value = static_cast<int>(card.getRank());
+    for (const CardPtr& card : hand) {
+        int rank = static_cast<int>(card->getRank());
 
-        if (card.getRank() == Rank::ace) {
+        if (rank == 14) {
             score += 11;
-            aces++;
+            ++aces;
         }
-        else if (value >= 11) {
+        else if (rank >= 10) {
             score += 10;
         }
         else {
-            score += value;
+            score += rank;
         }
     }
 
-    // Convert Aces from 11 to 1 if necessary
     while (score > 21 && aces > 0) {
         score -= 10;
-        aces--;
+        --aces;
     }
 
     return score;

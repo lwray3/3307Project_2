@@ -53,7 +53,7 @@ void QtCardAnimation::animateFlip(
     QWidget* card,
     std::function<void()> onFinished)
 {
-    auto* cardWidget = qobject_cast<CardWidget*>(card);
+auto* cardWidget = dynamic_cast<CardWidget*>(card);
 
     if (!cardWidget) {
         if (onFinished) onFinished();

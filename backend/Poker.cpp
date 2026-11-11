@@ -1,217 +1,300 @@
+
 #include "Poker.h"
-
-#include <algorithm>
-#include <array>
 #include <stdexcept>
-#include <vector>
-
-namespace {
-
-constexpr int BASE = 15;
-
-int encodeScore(
-    int category,
-    std::vector<int> ranks
-    ) {
-    // Five rank positions, padded with zeroes.
-    ranks.resize(5, 0);
-
-    int score = category;
-
-    for (int rank : ranks) {
-        score = score * BASE + rank;
-    }
-
-    return score;
-}
-
-} // namespace
+#include <iostream>
 
 Poker::Poker()
 {
-    deck.shuffle();
+    startRound();
 }
 
 void Poker::startRound()
 {
     player.clearHand();
-    opponent.clearHand();
+    dealer.clearHand();
+    communityCards.clear();
 
     deck.reset();
     deck.shuffle();
 
-    for (int i = 0; i < 5; i++) {
+    phase = PokerPhase::PreFlop;
+    result = PokerResult::None;
+    pot = 0;
+
+    // Deal two private cards to each player.
+    for (int i = 0; i < 2; ++i) {
         player.addCard(deck.dealCard());
-        opponent.addCard(deck.dealCard());
+        dealer.addCard(deck.dealCard());
     }
-
-    roundOver = false;
 }
 
-int Poker::calcScore(
-    const std::vector<Card>& hand
-    ) const
+bool Poker::isRoundOver() const
 {
-    if (hand.size() != 5) {
-        throw std::invalid_argument(
-            "Poker scoring requires exactly five cards"
-            );
-    }
-
-    std::array<int, 15> counts{};
-    std::vector<int> ranks;
-
-    bool flush = true;
-    Suit firstSuit = hand.front().getSuit();
-
-    for (const Card& card : hand) {
-        int rank = static_cast<int>(card.getRank());
-
-        counts[rank]++;
-        ranks.push_back(rank);
-
-        if (card.getSuit() != firstSuit) {
-            flush = false;
-        }
-    }
-
-    std::sort(ranks.begin(), ranks.end(),
-              std::greater<int>());
-
-    // Identify a straight.
-    std::vector<int> uniqueRanks = ranks;
-
-    uniqueRanks.erase(
-        std::unique(
-            uniqueRanks.begin(),
-            uniqueRanks.end()
-            ),
-        uniqueRanks.end()
-        );
-
-    bool straight = false;
-    int straightHigh = 0;
-
-    if (uniqueRanks.size() == 5) {
-        if (uniqueRanks.front() -
-                uniqueRanks.back() == 4) {
-
-            straight = true;
-            straightHigh = uniqueRanks.front();
-        }
-        else if (uniqueRanks ==
-                 std::vector<int>{14, 5, 4, 3, 2}) {
-
-            straight = true;
-            straightHigh = 5;
-        }
-    }
-
-    // Group ranks by their occurrence counts.
-    std::vector<std::pair<int, int>> groups;
-
-    for (int rank = 14; rank >= 2; rank--) {
-        if (counts[rank] > 0) {
-            groups.push_back({counts[rank], rank});
-        }
-    }
-
-    std::sort(groups.begin(), groups.end(),
-              [](const auto& a, const auto& b) {
-                  if (a.first != b.first) {
-                      return a.first > b.first;
-                  }
-                  return a.second > b.second;
-              });
-
-    // Straight flush
-    if (straight && flush) {
-        return encodeScore(8, {straightHigh});
-    }
-
-    // Four of a kind
-    if (groups[0].first == 4) {
-        return encodeScore(
-            7, {groups[0].second, groups[1].second}
-            );
-    }
-
-    // Full house
-    if (groups[0].first == 3 &&
-        groups[1].first == 2) {
-
-        return encodeScore(
-            6, {groups[0].second, groups[1].second}
-            );
-    }
-
-    // Flush
-    if (flush) {
-        return encodeScore(5, ranks);
-    }
-
-    // Straight
-    if (straight) {
-        return encodeScore(4, {straightHigh});
-    }
-
-    // Three of a kind
-    if (groups[0].first == 3) {
-        return encodeScore(
-            3, {
-                groups[0].second,
-                groups[1].second,
-                groups[2].second
-            }
-            );
-    }
-
-    // Two pair
-    if (groups[0].first == 2 &&
-        groups[1].first == 2) {
-
-        return encodeScore(
-            2, {
-                groups[0].second,
-                groups[1].second,
-                groups[2].second
-            }
-            );
-    }
-
-    // One pair
-    if (groups[0].first == 2) {
-        return encodeScore(
-            1, {
-                groups[0].second,
-                groups[1].second,
-                groups[2].second,
-                groups[3].second
-            }
-            );
-    }
-
-    // High card
-    return encodeScore(0, ranks);
+    return phase == PokerPhase::Finished;
 }
 
-void Poker::evaluateRound()
+bool Poker::canCall() const
 {
-    if (roundOver) {
-        return;
+    if (roundOver || !playerTurn) {
+        return false;
     }
 
-    int playerScore = calcScore(player.getHand());
-    int opponentScore = calcScore(opponent.getHand());
+    int amountToCall = currentBet - playerBet;
 
-    if (playerScore > opponentScore) {
+    return amountToCall > 0 && playerChips > 0;
+}
+
+#include <algorithm>
+#include <stdexcept>
+bool Poker::canFold() const
+{
+    return !isRoundOver() &&
+           phase != PokerPhase::Showdown &&
+           phase != PokerPhase::Finished;
+}
+
+void Poker::call()
+{
+    if (!canCall()) {
+        throw std::logic_error("Player cannot call");
+    }
+
+    int amountToCall = currentBet - playerBet;
+
+    // Allow short all-in calls
+    int amountPaid = std::min(amountToCall, playerChips);
+
+    playerChips -= amountPaid;
+    playerBet += amountPaid;
+    pot += amountPaid;
+
+    playerTurn = false;
+}
+
+bool Poker::canCheck() const
+{
+    return !isRoundOver();
+}
+
+bool Poker::canRaise(int raiseAmount) const
+{
+    if (roundOver || !playerTurn) {
+        return false;
+    }
+
+    if (raiseAmount < minimumRaise) {
+        return false;
+    }
+
+    int amountToCall = currentBet - playerBet;
+
+    int totalRequired = amountToCall + raiseAmount;
+
+    return totalRequired <= playerChips;
+}
+
+void Poker::reset() {
+    startRound();
+}
+
+void Poker::raise(int raiseAmount)
+{
+    if (!canRaise(raiseAmount)) {
+        throw std::logic_error("Invalid raise");
+    }
+
+    int amountToCall = currentBet - playerBet;
+
+    int totalRequired = amountToCall + raiseAmount;
+
+    playerChips -= totalRequired;
+    playerBet += totalRequired;
+
+    pot += totalRequired;
+
+    // New highest bet
+    currentBet = playerBet;
+
+    // Track minimum size of the next full raise
+    minimumRaise = raiseAmount;
+
+    playerTurn = false;
+}
+
+bool Poker::canBet() const
+{
+    return !isRoundOver()
+    && playerChips >= BET_AMOUNT
+            && dealerChips >= BET_AMOUNT;
+}
+
+int Poker::getCurrentBet() const
+{
+    return currentBet;
+}
+void Poker::check()
+{
+    if (!canCheck()) {
+        throw std::logic_error("Cannot check");
+    }
+
+    // The computer checks behind.
+    advancePhase();
+}
+
+void Poker::bet()
+{
+    if (!canBet()) {
+        throw std::logic_error("Cannot bet");
+    }
+
+    // Human bets, computer automatically calls.
+    playerChips -= BET_AMOUNT;
+    dealerChips -= BET_AMOUNT;
+
+    pot += BET_AMOUNT * 2;
+
+    advancePhase();
+}
+
+void Poker::fold()
+{
+    if (isRoundOver()) {
+        throw std::logic_error("Round already finished");
+    }
+
+    result = PokerResult::DealerWins;
+    dealerChips += pot;
+    pot = 0;
+
+    player.addLoss();
+    phase = PokerPhase::Finished;
+}
+
+void Poker::advancePhase()
+{
+    switch (phase) {
+    case PokerPhase::PreFlop:
+        // Burn one card, then reveal the flop.
+        deck.dealCard();
+
+        for (int i = 0; i < 3; ++i) {
+            communityCards.push_back(deck.dealCard());
+        }
+
+        phase = PokerPhase::Flop;
+        break;
+
+    case PokerPhase::Flop:
+        deck.dealCard(); // Burn
+        communityCards.push_back(deck.dealCard());
+        phase = PokerPhase::Turn;
+        break;
+
+    case PokerPhase::Turn:
+        deck.dealCard(); // Burn
+        communityCards.push_back(deck.dealCard());
+        phase = PokerPhase::River;
+        break;
+
+    case PokerPhase::River:
+        phase = PokerPhase::Showdown;
+        showdown();
+        break;
+
+    default:
+        throw std::logic_error(
+            "Cannot advance the current Poker phase"
+            );
+    }
+}
+
+void Poker::showdown()
+{
+    PokerHandRank playerRank = getPlayerHandRank();
+    PokerHandRank dealerRank = getDealerHandRank();
+
+    if (dealerRank < playerRank) {
+        result = PokerResult::PlayerWins;
+        playerChips += pot;
         player.addWin();
     }
-    else if (playerScore < opponentScore) {
+    else if (playerRank < dealerRank) {
+        result = PokerResult::DealerWins;
+        dealerChips += pot;
         player.addLoss();
     }
+    else {
+        result = PokerResult::Tie;
 
-    roundOver = true;
+        // All contributions are equal in this prototype.
+        playerChips += pot / 2;
+        dealerChips += pot / 2;
+    }
+
+    pot = 0;
+    phase = PokerPhase::Finished;
+}
+
+PokerHandRank Poker::getPlayerHandRank() const
+{
+    std::vector<CardPtr> cards = player.getHand();
+
+    cards.insert(
+        cards.end(),
+        communityCards.begin(),
+        communityCards.end()
+        );
+
+    return PokerHandEvaluator::evaluate(cards);
+}
+
+PokerHandRank Poker::getDealerHandRank() const
+{
+    std::vector<CardPtr> cards = dealer.getHand();
+
+    cards.insert(
+        cards.end(),
+        communityCards.begin(),
+        communityCards.end()
+        );
+
+    return PokerHandEvaluator::evaluate(cards);
+}
+
+PokerPhase Poker::getPhase() const
+{
+    return phase;
+}
+
+PokerResult Poker::getResult() const
+{
+    return result;
+}
+
+int Poker::getPot() const
+{
+    return pot;
+}
+
+
+void Poker::explain_rules() const
+{
+    std::cout << "Texas Hold'em Poker Rules:\n";
+    std::cout << "1. Each player receives two private cards.\n";
+    std::cout << "2. Five community cards are dealt.\n";
+    std::cout << "3. Players can check, bet, call, raise, or fold.\n";
+    std::cout << "4. The best five-card poker hand wins.\n";
+}
+
+int Poker::getPlayerChips() const
+{
+    return playerChips;
+}
+
+int Poker::getDealerChips() const
+{
+    return dealerChips;
 }
 
 const Player& Poker::getPlayer() const
@@ -219,25 +302,12 @@ const Player& Poker::getPlayer() const
     return player;
 }
 
-const Player& Poker::getOpponent() const
+const Player& Poker::getDealer() const
 {
-    return opponent;
+    return dealer;
 }
 
-bool Poker::isRoundOver() const
+const std::vector<CardPtr>& Poker::getCommunityCards() const
 {
-    return roundOver;
-}
-
-void Poker::reset()
-{
-    player.clearHand();
-    opponent.clearHand();
-    deck.reset();
-    roundOver = true;
-}
-
-void Poker::explain_rules() const
-{
-    std::cout<<"poker rules to finish later";
+    return communityCards;
 }
