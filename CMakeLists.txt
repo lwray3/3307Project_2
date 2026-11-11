@@ -1,4 +1,3 @@
-
 cmake_minimum_required(VERSION 3.16)
 
 project(CasinoGame_3307 VERSION 0.1 LANGUAGES CXX)
@@ -18,26 +17,37 @@ qt_add_executable(CasinoGame_3307
     main.cpp
     core/Blackjack.cpp
     core/Blackjack.h
+
     core/Baccarat.cpp
     core/Baccarat.h
+
     core/Card.cpp
     core/Card.h
+
     core/CardFactory.cpp
     core/CardFactory.h
+
     core/Deck.cpp
     core/Deck.h
+
     core/Player.cpp
     core/Player.h
+
     core/IGame.h
     core/GameManager.h
+
     core/Poker.cpp
     core/Poker.h
-    core/pokerEvaluator.h
-    core/pokerEvaluator.cpp
-    core/GameFactory.h
-    core/GameFactory.cpp
 
-    # Qt user interface
+    core/pokerEvaluator.cpp
+    core/pokerEvaluator.h
+
+    core/GameFactory.cpp
+    core/GameFactory.h
+
+    core/CardWidget.cpp
+    core/CardWidget.h
+
     ui/mainwindow.cpp
     ui/mainwindow.h
     ui/mainwindow.ui
@@ -50,16 +60,18 @@ qt_add_executable(CasinoGame_3307
     ui/pokerwindow.h
     ui/pokerwindow.ui
 
-    core/CardWidget.h
-    core/CardWidget.cpp
+    baccaratwindow.cpp
+    baccaratwindow.h
+    baccaratwindow.ui
 
     ui/IGameAnimation.h
-    ui/QtCardAnimation.h
     ui/QtCardAnimation.cpp
+    ui/QtCardAnimation.h
 
-    ui/GameWindow.h
     ui/GameWindow.cpp
+    ui/GameWindow.h
     README.md
+)
 )
 
 # Allow source files to include headers from both folders
