@@ -9,9 +9,9 @@
 #include <QVector>
 #include <QWidget>
 
-#include "backend/Blackjack.h"
-#include "backend/CardWidget.h"
-#include "backend/GameManager.h"
+#include "core/Blackjack.h"
+#include "core/CardWidget.h"
+#include "core/GameManager.h"
 #include "GameWindow.h"
 
 namespace Ui {
