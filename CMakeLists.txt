@@ -72,7 +72,7 @@ qt_add_executable(CasinoGame_3307
     ui/GameWindow.h
     README.md
 )
-)
+
 
 # Allow source files to include headers from both folders
 target_include_directories(CasinoGame_3307 PRIVATE

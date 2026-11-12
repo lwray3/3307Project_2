@@ -57,12 +57,12 @@ static void displayHand(QHBoxLayout* layout,const std::vector<CardPtr>& hand)
 
 
 BaccaratWindow::BaccaratWindow(QWidget *parent)
-    : QDialog(parent),
-    ui(new Ui::Dialog),
+    : GameWindow(parent),
+    ui(new Ui::BaccaratForm),
     game(GameFactory::createBaccarat())
 {
     ui->setupUi(this);
-
+    setActionLabel(ui->result_label);
 
     playerCardsLayout = new QHBoxLayout(ui->PlayerCards);
     bankerCardsLayout = new QHBoxLayout(ui->BankerCards);
@@ -118,7 +118,7 @@ void BaccaratWindow::onDeal()
         result = "It's a tie!";
     }
 
-    ui->result_label->setText(result);
+    showResultMessage(result);
 }
 BaccaratWindow::~BaccaratWindow()
 {
