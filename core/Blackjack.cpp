@@ -23,41 +23,29 @@ void Blackjack::startRound() {
     }
 }
 
-
-// Player requests another card
-CardPtr Blackjack::hit()
+CardPtr Blackjack::hit() // Player requests another card
 {
-    // Prevent hitting after the round has ended
-    if (!canHit()) {
+
+    if (!canHit()) { // Prevent hitting after the round has ended
         throw std::logic_error("Cannot hit: round is over or hitting is not allowed");
     }
-
-    // Deals a new card
-    CardPtr new_card = deck.dealCard();
-
-    // Add the card to the player's hand
-    player.addCard(new_card);
-
-    // Calculate the player's new score
+    CardPtr new_card = deck.dealCard(); // Prevent hitting after the round has ended
+    player.addCard(new_card); // Prevent hitting after the round has ended
     int score = getPlayerScore();
 
-    // Check if the player busted
     if (score > 21) {
+        // Check if the player busted
         roundOver = true;
         dealerTurn = false;
         player.addLoss();
     }
-    // Automatically stand if the player reaches 21
-    else if (score == 21) {
+    else if (score == 21) { // Automatically stand if the player reaches 21
         stand();
     }
-
-    // Return the card so the UI can animate it
-    return new_card;
+    return new_card; // Automatically stand if the player reaches 21
 }
 
-// Player stands, dealer draws until reaching 17
-void Blackjack::stand()
+void Blackjack::stand()// Player stands, dealer draws until reaching 17
 {
     if (!canStand()) {
         throw std::logic_error("Cannot stand");
@@ -65,13 +53,12 @@ void Blackjack::stand()
 
     dealerTurn = true;
 }
-// Return the player
-const Player& Blackjack::getPlayer() const {
+
+const Player& Blackjack::getPlayer() const {// Return the player
     return player;
 }
 
-// Return the dealer
-const Player& Blackjack::getDealer() const {
+const Player& Blackjack::getDealer() const {// Return the dealer
     return dealer;
 }
 
@@ -79,7 +66,7 @@ int Blackjack::getPlayerScore() const {
     return calcScore(player.getHand());
 }
 
-CardPtr Blackjack::dealerHit()
+CardPtr Blackjack::dealerHit() //add a card to the dealer hand
 {
     if (!dealerShouldHit()) {
         throw std::logic_error("Dealer cannot hit");
@@ -96,9 +83,9 @@ bool Blackjack::dealerShouldHit() const
 {
     return !roundOver
            && dealerTurn
-           && getDealerScore() < 17;
+           && getDealerScore() < 17; //the dealer should only hit if it's less than 17
 }
-// Return the dealer
+
 int Blackjack::getDealerScore() const {
     return calcScore(dealer.getHand());
 }
@@ -119,7 +106,7 @@ bool Blackjack::isDealerTurn() const
 {
     return dealerTurn;
 }
-void Blackjack::finishRound()
+void Blackjack::finishRound() //perform all of the computations to determine the winner
 {
     if (roundOver || !dealerTurn) {
         return;
@@ -130,9 +117,8 @@ void Blackjack::finishRound()
             "Dealer must finish drawing first"
             );
     }
-
-    int playerScore = getPlayerScore();
-    int dealerScore = getDealerScore();
+    int playerScore = getPlayerScore(); //get the player score
+    int dealerScore = getDealerScore(); //get the score for the dealer
 
     if (dealerScore > 21) {
         player.addWin();
@@ -143,18 +129,14 @@ void Blackjack::finishRound()
     else if (dealerScore > playerScore) {
         player.addLoss();
     }
-
-    // Equal scores represent a tie.
-
-    roundOver = true;
+    roundOver = true; // Return the dealer
     dealerTurn = false;
 }
-// Check whether the round is finished
-bool Blackjack::isRoundOver() const {
+
+bool Blackjack::isRoundOver() const { // Check whether the round is finished
     return roundOver;
 }
 
-// Explain Blackjack rules
 void Blackjack::explain_rules() const {
     std::cout << "In Blackjack, the goal is to have a hand value "
               << "as close to 21 as possible without going over."
@@ -169,8 +151,8 @@ void Blackjack::explain_rules() const {
               << std::endl;
 }
 
-// Calculate the score of a hand
-int Blackjack::calcScore(const std::vector<CardPtr>& hand) const
+
+int Blackjack::calcScore(const std::vector<CardPtr>& hand) const // Calculate the score of a hand
 {
     int score = 0;
     int aces = 0;
@@ -198,8 +180,7 @@ int Blackjack::calcScore(const std::vector<CardPtr>& hand) const
     return score;
 }
 
-// Reset the game
-void Blackjack::reset() {
+void Blackjack::reset() { // Reset the game
     startRound();
 }
 

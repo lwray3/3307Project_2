@@ -9,7 +9,7 @@ private:
     std::unique_ptr<IGame> currentGame;
 
 public:
-    void setGame(std::unique_ptr<IGame> game) {
+    void setGame(std::unique_ptr<IGame> game) { //set the game and use the methods from the IGame class
         if (!game) {
             throw std::invalid_argument("Game cannot be null");
         }

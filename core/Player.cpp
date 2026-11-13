@@ -1,7 +1,7 @@
 
 #include "Player.h"
 
-Player::Player() {
+Player::Player() { //these methods are pretty self explanatory
 }
 
 void Player::addCard(CardPtr card) {

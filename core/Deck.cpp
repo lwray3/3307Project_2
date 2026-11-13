@@ -11,8 +11,8 @@ Deck::Deck() : currCard(0) {
     reset();
 }
 
-// Shuffle the deck
-void Deck::shuffle() {
+
+void Deck::shuffle() { // Shuffle the deck
     std::random_device rd;
     std::mt19937 g(rd());
 
@@ -21,7 +21,7 @@ void Deck::shuffle() {
     currCard = 0;
 }
 
-void Deck::reset() {
+void Deck::reset() { //make a new deck full of cards
     cards.clear();
     currCard = 0;
 
@@ -51,7 +51,7 @@ void Deck::reset() {
     }
 }
 
-CardPtr Deck::dealCard() {
+CardPtr Deck::dealCard() { //deal the cards to the hands of the player or dealer
     if (currCard >= cards.size()) {
         throw std::runtime_error("No cards remaining.");
     }
