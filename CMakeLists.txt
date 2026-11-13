@@ -10,68 +10,50 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
-
 qt_standard_project_setup()
-
 qt_add_executable(CasinoGame_3307
     main.cpp
     core/Blackjack.cpp
     core/Blackjack.h
-
     core/Baccarat.cpp
     core/Baccarat.h
-
     core/Card.cpp
     core/Card.h
-
     core/CardFactory.cpp
     core/CardFactory.h
-
     core/Deck.cpp
     core/Deck.h
-
     core/Player.cpp
     core/Player.h
-
     core/IGame.h
     core/GameManager.h
-
     core/Poker.cpp
     core/Poker.h
-
     core/pokerEvaluator.cpp
     core/pokerEvaluator.h
-
     core/GameFactory.cpp
     core/GameFactory.h
-
     core/CardWidget.cpp
     core/CardWidget.h
-
     ui/mainwindow.cpp
     ui/mainwindow.h
     ui/mainwindow.ui
-
     ui/blackjackwindow.cpp
     ui/blackjackwindow.h
     ui/blackjackwindow.ui
-
     ui/pokerwindow.cpp
     ui/pokerwindow.h
     ui/pokerwindow.ui
-
-    baccaratwindow.cpp
-    baccaratwindow.h
-    baccaratwindow.ui
-
+    ui/baccaratwindow.cpp
+    ui/baccaratwindow.h
+    ui/baccaratwindow.ui
     ui/IGameAnimation.h
     ui/QtCardAnimation.cpp
     ui/QtCardAnimation.h
-
     ui/GameWindow.cpp
     ui/GameWindow.h
     README.md
-)
+
 )
 
 # Allow source files to include headers from both folders

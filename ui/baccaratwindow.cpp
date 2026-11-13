@@ -1,4 +1,3 @@
-
 #include "baccaratwindow.h"
 #include "ui_baccaratwindow.h"
 #include "core/GameFactory.h"
