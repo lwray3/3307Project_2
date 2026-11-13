@@ -50,7 +50,7 @@ PokerWindow::PokerWindow(
     updateButtons();
 }
 
-void PokerWindow::animateCard(
+void PokerWindow::animateCard( //animate the card
     const CardPtr& card,
     QVector<CardWidget*>& collection,
     const QPoint& target,
@@ -80,7 +80,7 @@ void PokerWindow::animateCard(
         }
         );
 }
-void PokerWindow::displayInitialCards()
+void PokerWindow::displayInitialCards() //same as the Blackjack methods
 {
     const auto& playerHand = game().getPlayer().getHand();
     const auto& dealerHand = game().getDealer().getHand();
@@ -105,7 +105,7 @@ void PokerWindow::displayInitialCards()
     }
 }
 
-void PokerWindow::onCall()
+void PokerWindow::onCall() //check if the game can call and if so call if the call button
 {
     if (!game().canCall()) {
         return;
@@ -115,7 +115,7 @@ void PokerWindow::onCall()
     updatePlayerStats();
 }
 
-void PokerWindow::onRaise()
+void PokerWindow::onRaise() //same as the call method but raising
 {
     int raiseAmount = ui->raiseAmountSpinBox->value();
     if (!game().canRaise(raiseAmount)) {
@@ -141,7 +141,7 @@ void PokerWindow::updatePlayerStats()
         );
 }
 
-void PokerWindow::displayNewCommunityCards()
+void PokerWindow::displayNewCommunityCards() //
 {
     const auto& community = game().getCommunityCards();
     const int spacing = 82;

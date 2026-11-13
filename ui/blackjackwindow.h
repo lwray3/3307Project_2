@@ -39,7 +39,7 @@ private:
     GameManager& manager;
     Blackjack& game() const {
         Blackjack* blackjack =
-            dynamic_cast<Blackjack*>(manager.getGame());
+            dynamic_cast<Blackjack*>(manager.getGame()); //the actual game is then set to being managed
         if (!blackjack) {
             throw std::logic_error(
                 "No active Blackjack game"

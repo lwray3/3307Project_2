@@ -18,14 +18,14 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->playPoker, &QPushButton::clicked, this, &MainWindow::openPoker);
     connect(ui->playBaccarat, &QPushButton::clicked, this, &MainWindow::openBaccarat);
 }
-void MainWindow::openBlackjack()
+void MainWindow::openBlackjack() //checks whether a blackjack window already exists, and calls GameFactory to create Blackjack game
 {
     qDebug() << "Play Blackjack button clicked!";
-    if (!blackjackWindow) {
+    if (!blackjackWindow) { //only creates a new Blackjack window if one doesn't exist
         qDebug() << "Creating blackjack game";
         auto blackjack = GameFactory::createBlackjack();
         manager.setGame(std::move(blackjack));
-        manager.startRound();
+        manager.startRound(); //gives the game to the object to be managed
         qDebug() << "Creating blackjack window";
         blackjackWindow = new BlackjackWindow(
             manager,
@@ -63,15 +63,15 @@ void MainWindow::openBlackjack()
 void MainWindow::openPoker()
 {
     qDebug() << "Play Poker button clicked!";
-    if (!pokerWindow) {
+    if (!pokerWindow) { // creates Poker windo w if it doesn't exist already
         qDebug() << "Creating Poker game";
-        auto poker = GameFactory::createPoker();
+        auto poker = GameFactory::createPoker(); //create the poker game
         manager.setGame(std::move(poker));
         manager.startRound();
         pokerWindow = new PokerWindow(manager, this);
 
-        // Make PokerWindow a separate window
-        pokerWindow->setWindowFlag(Qt::Window, true);
+
+        pokerWindow->setWindowFlag(Qt::Window, true); // Make PokerWindow a separate window
         connect(
             pokerWindow,
             &GameWindow::backRequested,
@@ -104,7 +104,6 @@ void MainWindow::openPoker()
     pokerWindow->activateWindow();
     this->hide();
 }
-
 
 void MainWindow::openBaccarat()
 {

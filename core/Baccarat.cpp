@@ -4,12 +4,12 @@
 
 Baccarat::Baccarat()
 {
-    deck.shuffle();
+    startRound();
 }
 
-void Baccarat::startRound()
+void Baccarat::startRound() //starts the round right when the
 {
-    player.clearHand();
+    player.clearHand(); //
     banker.clearHand();
 
     deck.reset();

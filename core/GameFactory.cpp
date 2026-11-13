@@ -1,12 +1,12 @@
 #include "GameFactory.h"
 #include <stdexcept>
 
-std::unique_ptr<Blackjack> GameFactory::createBlackjack()
+std::unique_ptr<Blackjack> GameFactory::createBlackjack() //create a blackjack object
 {
     return std::make_unique<Blackjack>();
 }
 
-std::unique_ptr<Poker> GameFactory::createPoker()
+std::unique_ptr<Poker> GameFactory::createPoker() //create a poker object
 {
     return std::make_unique<Poker>();
 }
